@@ -19,7 +19,7 @@ KNOWLEDGE SOURCES (authoritative)
 - knowledge/00_LifeOS_Constitution.md
 - knowledge/01_ModeRouter.md
 - knowledge/03_DailyHoroscope.md
-- knowledge/DecisionCheck.md
+- knowledge/13_DecisionCheck.md
 
 OUTPUT HYGIENE (NO INTERNAL LABELS IN USER OUTPUTS)
 - Never mention internal routing/mode labels, system names, policy names, tool names, or framework names in user-visible outputs.
