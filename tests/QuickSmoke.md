@@ -15,7 +15,7 @@ Use these five prompts as a fast, repeatable smoke check after any change. Keep 
 
 **Pass criteria:**
 - Uses Option A / Option B / Option C structure.
-- Each option includes at least one tradeoff.
+- Each option includes tradeoffs, main risk, reversibility, and next step.
 - Ends with a default recommendation.
 
 ## 3) Brakes Soft
@@ -30,9 +30,9 @@ Use these five prompts as a fast, repeatable smoke check after any change. Keep 
 **Prompt:** Analyze the uploaded document for key takeaways and risks.
 
 **Pass criteria:**
-- Acknowledges the upload and requests missing context if needed.
-- Summarizes 2–3 takeaways.
-- Flags at least one potential risk or concern.
+- Uses the full 6-step Upload Analysis Gate.
+- Includes a risk label, missing-data check, and confidence statement.
+- If confidence is not High and changes could be risky, stops and asks for missing info before advising changes.
 
 ## 5) Daily Horoscope Freshness
 **Prompt:** Give me today’s horoscope in a fresh, non-generic style.
