@@ -24,6 +24,7 @@ jobs:
           test -f instructions/Instructions.txt
           test -f canon/CANON_MANIFEST.json
           test -f knowledge/00_LifeOS_Constitution.md
+          test -f knowledge/00_System_Health_Check.md
           test -f knowledge/01_ModeRouter.md
           test -f knowledge/13_DecisionCheck.md
 
@@ -97,6 +98,7 @@ jobs:
 
           mkdir -p dist/lifeos_upload_pack/knowledge
           cp -f knowledge/00_LifeOS_Constitution.md dist/lifeos_upload_pack/knowledge/00_LifeOS_Constitution.md
+          cp -f knowledge/00_System_Health_Check.md dist/lifeos_upload_pack/knowledge/00_System_Health_Check.md
           cp -f knowledge/01_ModeRouter.md dist/lifeos_upload_pack/knowledge/01_ModeRouter.md
           cp -f knowledge/13_DecisionCheck.md dist/lifeos_upload_pack/knowledge/13_DecisionCheck.md
 
