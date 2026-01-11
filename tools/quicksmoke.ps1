@@ -1,16 +1,18 @@
 #requires -Version 7.0
 <#
-Life OS — QuickSmoke (Tier 1: Repo Integrity)
+Life OS — QuickSmoke (Tier 2: Core Integrity)
 Dependency-free PowerShell 7 script.
 
 Checks:
-1) instructions/Instructions.txt exists and is non-trivial (>=2000 chars)
-2) canon/CANON_MANIFEST.json exists and parses as JSON
-3) Placeholder drift scan (TODO/FIXME/TBD/<INSERT/REPLACE ME) in instructions + manifest
-4) Manifest-referenced paths exist in repo (robust extraction):
+1) Core files exist (architecture floor)
+2) instructions/Instructions.txt exists and is non-trivial (>=2000 chars)
+3) canon/CANON_MANIFEST.json exists and parses as JSON
+4) Placeholder drift scan (TODO/FIXME/TBD/<INSERT/REPLACE ME) in instructions + manifest
+5) Manifest-referenced paths exist in repo (robust extraction):
    - Any property named "path"
    - Any string value that looks like a repo-relative path (ignores URLs)
    - Normalizes slashes, rejects absolute paths and ../ traversal
+   - Skips repo identifiers like "owner/repo" ONLY when they do NOT look like file paths (no dots)
 #>
 
 Set-StrictMode -Version Latest
@@ -34,6 +36,27 @@ $ManifestPath     = Join-Path $RepoRoot "canon\CANON_MANIFEST.json"
 Write-Host "Life OS QuickSmoke running..." -ForegroundColor Cyan
 Write-Host "Repo root: $RepoRoot"
 Write-Host ""
+
+# 0) Tier-2: Core files MUST exist
+$coreFiles = @(
+  "knowledge/00_LifeOS_Constitution.md",
+  "knowledge/01_ModeRouter.md",
+  "instructions/Instructions.txt",
+  "canon/CANON_MANIFEST.json"
+)
+
+$missingCore = @()
+foreach ($f in $coreFiles) {
+  $full = Join-Path $RepoRoot $f
+  if (-not (Test-Path $full)) { $missingCore += $f }
+}
+
+if ($missingCore.Count -gt 0) {
+  Write-Host "Missing core file(s):" -ForegroundColor Yellow
+  $missingCore | ForEach-Object { Write-Host " - $_" }
+  Fail ("{0} core file(s) missing. Restore before continuing." -f $missingCore.Count)
+}
+Ok "Core files exist (Tier-2 floor)"
 
 # 1) Instructions exists and length check
 if (-not (Test-Path $InstructionsPath)) {
@@ -70,31 +93,35 @@ if ($hits) {
 Ok "No placeholder tokens detected in instructions/manifest"
 
 # 4) Discover and validate manifest-referenced paths (robust extraction)
-
 $paths = New-Object System.Collections.Generic.List[string]
+
+function LooksLikeRepoSlug([string]$p) {
+  # "owner/repo" (two segments) with no dots anywhere
+  return ($p -match '^[A-Za-z0-9_-]+/[A-Za-z0-9_.-]+$' -and -not ($p -match '\.'))
+}
 
 function Add-Path([string]$p) {
   if ([string]::IsNullOrWhiteSpace($p)) { return }
   $p = $p.Trim()
 
-  # Ignore URLs and obvious non-paths
+  # Ignore URLs
   if ($p -match '^\w+://') { return }
-
-  # Skip GitHub repo slugs like "owner/repo" ONLY when it does NOT look like a file path
-  # (i.e., no dot anywhere). This prevents skipping real paths like "canon/CANON_MANIFEST.json".
-  if ($p -match '^[A-Za-z0-9_-]+/[A-Za-z0-9_.-]+$' -and -not ($p -match '\.')) { return }
 
   # Normalize slashes
   $p = $p -replace '\\','/'
+
+  # Skip repo identifiers like "owner/repo" (only if it doesn't look like a file path)
+  if (LooksLikeRepoSlug $p) { return }
 
   # Reject absolute paths or traversal
   if ($p.StartsWith("/") -or $p -match '^[A-Za-z]:/' -or $p.Contains("../") -or $p.Contains("..\")) {
     Fail "Unsafe/absolute path found in manifest: $p"
   }
 
-  # Only keep candidates that look path-like
-  # (has an extension or a folder separator)
-  if ($p -match '\.[A-Za-z0-9]{1,8}$' -or $p.Contains('/')) {
+  # Only keep candidates that look path-like:
+  # - contains a slash (folder separator), OR
+  # - ends with a likely file extension
+  if ($p.Contains('/') -or $p -match '\.[A-Za-z0-9]{1,8}$') {
     $paths.Add($p)
   }
 }
@@ -102,7 +129,6 @@ function Add-Path([string]$p) {
 function Walk($node) {
   if ($null -eq $node) { return }
 
-  # Object-like
   if ($node -is [System.Management.Automation.PSCustomObject]) {
     foreach ($prop in $node.PSObject.Properties) {
       if ($prop.Name -ieq "path" -and $prop.Value -is [string]) {
@@ -113,7 +139,6 @@ function Walk($node) {
     return
   }
 
-  # Hashtable-like
   if ($node -is [hashtable]) {
     foreach ($k in $node.Keys) {
       $v = $node[$k]
@@ -123,13 +148,11 @@ function Walk($node) {
     return
   }
 
-  # Arrays/lists
   if ($node -is [System.Collections.IEnumerable] -and -not ($node -is [string])) {
     foreach ($item in $node) { Walk $item }
     return
   }
 
-  # String leaf
   if ($node -is [string]) { Add-Path $node }
 }
 
@@ -160,4 +183,3 @@ Ok "All manifest-referenced paths exist"
 Write-Host ""
 Write-Host "PASS: QuickSmoke completed successfully" -ForegroundColor Green
 exit 0
-
