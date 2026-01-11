@@ -11,6 +11,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Read VERSION
         id: ver
@@ -34,6 +36,7 @@ jobs:
           path = "instructions/Instructions.txt"
           txt = open(path, "r", encoding="utf-8").read()
 
+          # Find repo-like file references (simple heuristic):
           candidates = set(re.findall(r'\b(?:knowledge|canon|docs|instructions)/[A-Za-z0-9._\-/]+\b', txt))
 
           missing = []
@@ -55,7 +58,7 @@ jobs:
         run: |
           set -e
           base="${{ github.base_ref }}"
-          git fetch origin "$base" --depth=1
+          git fetch origin "$base" --depth=50
           changed=$(git diff --name-only "origin/$base"...HEAD)
 
           echo "$changed" | grep -E '^(instructions/Instructions\.txt|knowledge/)' >/dev/null && changed_core=1 || changed_core=0
@@ -74,6 +77,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Read VERSION
         id: ver
@@ -95,6 +100,7 @@ jobs:
           cp -f knowledge/01_ModeRouter.md dist/lifeos_upload_pack/knowledge/01_ModeRouter.md
           cp -f knowledge/13_DecisionCheck.md dist/lifeos_upload_pack/knowledge/13_DecisionCheck.md
 
+          # Include docs that affect behavior (optional)
           mkdir -p dist/lifeos_upload_pack/docs/safety
           if [ -f docs/safety/TIER2_SAFETY_POLISH.md ]; then
             cp -f docs/safety/TIER2_SAFETY_POLISH.md dist/lifeos_upload_pack/docs/safety/TIER2_SAFETY_POLISH.md
