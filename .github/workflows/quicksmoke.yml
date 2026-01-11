@@ -1,0 +1,20 @@
+name: QuickSmoke
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  quicksmoke:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Run QuickSmoke
+        shell: pwsh
+        run: |
+          pwsh -File ./tools/quicksmoke.ps1
