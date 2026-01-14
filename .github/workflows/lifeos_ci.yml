@@ -39,7 +39,6 @@ jobs:
           path = "instructions/Instructions.txt"
           txt = open(path, "r", encoding="utf-8").read()
 
-          # Find repo-like file references (simple heuristic):
           candidates = set(re.findall(r'\b(?:knowledge|canon|docs|instructions)/[A-Za-z0-9._\-/]+\b', txt))
 
           missing = []
@@ -106,7 +105,12 @@ jobs:
           cp -f knowledge/10_Skincare.md dist/lifeos_upload_pack/knowledge/10_Skincare.md
           cp -f knowledge/13_DecisionCheck.md dist/lifeos_upload_pack/knowledge/13_DecisionCheck.md
 
-          # Include docs that affect behavior (optional)
+          # Planning / reference docs (optional)
+          mkdir -p dist/lifeos_upload_pack/docs/automation
+          if [ -f docs/automation/reminders_spec.md ]; then
+            cp -f docs/automation/reminders_spec.md dist/lifeos_upload_pack/docs/automation/reminders_spec.md
+          fi
+
           mkdir -p dist/lifeos_upload_pack/docs/safety
           if [ -f docs/safety/TIER2_SAFETY_POLISH.md ]; then
             cp -f docs/safety/TIER2_SAFETY_POLISH.md dist/lifeos_upload_pack/docs/safety/TIER2_SAFETY_POLISH.md
