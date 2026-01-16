@@ -1,0 +1,19 @@
+name: Validate Wrapper
+
+on:
+  pull_request:
+    paths:
+      - 'instructions/Instructions.txt'
+      - 'docs/CustomGPT_Instructions_Wrapper.md'
+      - 'tests/validator.py'
+
+jobs:
+  validate-wrapper:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run wrapper validator
+        run: |
+          python3 tests/validator.py
