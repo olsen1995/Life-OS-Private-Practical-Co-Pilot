@@ -15,6 +15,7 @@ param(
     [switch]$Check
 )
 
+# Canonical manifest key order
 $canonicalOrder = @(
     "name",
     "version",
@@ -28,21 +29,27 @@ function Get-ManifestFiles($basePath) {
     if (Test-Path $basePath -PathType Leaf -and $basePath -like "*.manifest") {
         return @($basePath)
     }
-    return Get-ChildItem -Path $basePath -Recurse -Include "*.manifest" -File | Select-Object -ExpandProperty FullName
+
+    return Get-ChildItem -Path $basePath -Recurse -Include "*.manifest" -File |
+    Select-Object -ExpandProperty FullName
 }
 
-function Reorder-ManifestKeys($json) {
+function Format-ManifestKeys($json) {
     $ordered = [ordered]@{}
+
     foreach ($key in $canonicalOrder) {
         if ($json.PSObject.Properties.Name -contains $key) {
             $ordered[$key] = $json.$key
         }
     }
+
+    # Preserve any non-canonical / unknown keys at the end
     foreach ($prop in $json.PSObject.Properties.Name) {
         if (-not $ordered.Contains($prop)) {
             $ordered[$prop] = $json.$prop
         }
     }
+
     return $ordered
 }
 
@@ -54,23 +61,21 @@ foreach ($file in $files) {
         $originalText = Get-Content $file -Raw
         $originalJson = $originalText | ConvertFrom-Json -ErrorAction Stop
 
-        $reordered = Reorder-ManifestKeys $originalJson
-        $reorderedText = $reordered | ConvertTo-Json -Depth 10
+        $formatted = Format-ManifestKeys $originalJson
+        $formattedText = $formatted | ConvertTo-Json -Depth 10
 
-        if ($originalText -ne $reorderedText) {
+        if ($originalText -ne $formattedText) {
             if ($Check) {
                 Write-Output "❌ [OUT OF ORDER] $file"
                 $filesWithIssues += $file
             }
             else {
-                Set-Content -Path $file -Value $reorderedText
+                Set-Content -Path $file -Value $formattedText -Encoding UTF8
                 Write-Output "✅ [FIXED] $file"
             }
         }
-        else {
-            if ($Check) {
-                Write-Output "✅ [OK] $file"
-            }
+        elseif ($Check) {
+            Write-Output "✅ [OK] $file"
         }
 
     }
@@ -86,4 +91,12 @@ if ($Check -and $filesWithIssues.Count -gt 0) {
 
 if ($Check) {
     Write-Output "`n✅ All files have correct key order."
+}
+if ($filesWithIssues.Count -gt 0) {
+    Write-Output "`n❌ $($filesWithIssues.Count) file(s) failed linting."
+    exit 1
+}
+else {
+    Write-Output "`n✅ All files passed linting."
+    exit 0
 }
