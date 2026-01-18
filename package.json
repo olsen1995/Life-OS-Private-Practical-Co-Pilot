@@ -8,7 +8,13 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "release": "standard-version",
+    "setup": "powershell -ExecutionPolicy Bypass -File scripts/setup.ps1",
+    "lint-manifest": "powershell -ExecutionPolicy Bypass -File scripts/manifest_lint.ps1",
+    "fix-manifest": "powershell -ExecutionPolicy Bypass -File scripts/manifest_order_fix.ps1",
+    "hygiene": "powershell -ExecutionPolicy Bypass -File scripts/manifest_hygiene.ps1",
+    "precommit": "powershell -ExecutionPolicy Bypass -File scripts/pre-commit.ps1"
   },
   "repository": {
     "type": "git",
