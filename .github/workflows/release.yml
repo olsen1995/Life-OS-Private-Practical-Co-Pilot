@@ -40,7 +40,7 @@ jobs:
           git push --follow-tags origin main
 
       - name: 🏷️ Create GitHub Release with changelog
-        uses: softprops/action-gh-release@v1
+        uses: /action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
@@ -58,7 +58,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: ▶ Run manifest_lint.ps1
-        shell: pwsh
+        shell: pwshsoftprops
         run: ./scripts/manifest_lint.ps1
 
       - name: ▶ Run manifest_order_fix.ps1
