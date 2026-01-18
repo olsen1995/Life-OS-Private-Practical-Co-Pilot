@@ -1,0 +1,20 @@
+name: Manifest Hygiene Check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  hygiene:
+    name: Run Manifest Hygiene
+    runs-on: windows-latest
+
+    steps:
+      - name: 📥 Checkout repo
+        uses: actions/checkout@v3
+
+      - name: 🧼 Run Manifest Hygiene Script
+        shell: pwsh
+        run: ./scripts/check/manifest_hygiene.ps1
