@@ -1,10 +1,10 @@
 name: Release
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:    # ✅ Manual trigger from Actions tab
   push:
     branches:
-      - main
+      - main            # ✅ Auto-run on pushes to main branch
 
 jobs:
   release:
@@ -31,4 +31,8 @@ jobs:
         run: npm run release
 
       - name: 📤 Push changes and tags
-        run: git push --follow-tags origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}
+          git push --follow-tags origin main
