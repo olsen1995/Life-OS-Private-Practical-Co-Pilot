@@ -48,6 +48,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+
   ps-scripts:
     name: 🧪 Run PowerShell Scripts
     runs-on: windows-latest
@@ -56,6 +57,22 @@ jobs:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v3
 
-      - name: 🧪 Run manifest_lint.ps1
+      - name: ▶ Run manifest_lint.ps1
         shell: pwsh
         run: ./scripts/manifest_lint.ps1
+
+      - name: ▶ Run manifest_order_fix.ps1
+        shell: pwsh
+        run: ./scripts/manifest_order_fix.ps1
+
+      - name: ▶ Run manifest_hygiene.ps1
+        shell: pwsh
+        run: ./scripts/manifest_hygiene.ps1
+
+      - name: ▶ Run pre-commit.ps1
+        shell: pwsh
+        run: ./scripts/pre-commit.ps1
+
+      - name: ▶ Run setup.ps1
+        shell: pwsh
+        run: ./scripts/setup.ps1
