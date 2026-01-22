@@ -6,17 +6,17 @@ from mode_router import ModeRouter
 # Initialize FastAPI app
 app = FastAPI()
 
-# Mount static directory for GPT plugin manifest
+# Serve GPT plugin manifest
 app.mount("/.well-known", StaticFiles(directory=".well-known"), name="static")
 
-# Initialize the router
+# Initialize mode router
 router = ModeRouter()
 
-# Define input model
+# Define input data model
 class UserInput(BaseModel):
     input: str
 
-# Define /route endpoint
+# Define API route
 @app.post("/route")
 async def route_input(data: UserInput):
     mode = router.detect_mode(data.input)

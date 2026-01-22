@@ -1,5 +1,4 @@
 import re
-from collections import defaultdict
 
 class ModeRouter:
     def __init__(self):
@@ -24,17 +23,15 @@ class ModeRouter:
             ]
         }
 
-    def detect_mode(self, user_input: str):
-        # Normalize and search input text
+    def detect_mode(self, user_input: str) -> str:
         user_input = user_input.lower()
-        matched_modes = defaultdict(int)
+        matched_modes: dict[str, int] = {}
 
         for mode, keywords in self.modes.items():
             for keyword in keywords:
                 if keyword in user_input:
-                    matched_modes[mode] += 1
+                    matched_modes[mode] = matched_modes.get(mode, 0) + 1
 
-        # Return the mode with the most keyword hits
         if matched_modes:
-            return max(matched_modes, key=matched_modes.get)
+            return max(matched_modes, key=lambda k: matched_modes[k])
         return "Unknown"
