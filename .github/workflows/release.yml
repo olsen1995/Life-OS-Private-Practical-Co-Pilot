@@ -19,7 +19,7 @@ jobs:
       - name: ⚙️ Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: "18"
 
       - name: 🧾 Configure Git user
         run: |
@@ -29,29 +29,49 @@ jobs:
       - name: 📦 Install dependencies
         run: npm ci
 
-      - name: 🚀 Run release script (only if tag does not exist)
+      - name: 🔎 Validate version & run release
+        shell: bash
         run: |
           VERSION=$(node -p "require('./package.json').version")
-          if git tag | grep -q "v$VERSION"; then
-            echo "🔁 Tag v$VERSION already exists. Skipping release."
-          else
-            npm run release
+
+          echo "Detected version: $VERSION"
+
+          # Enforce strict semver: 1.2.3
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "❌ ERROR: package.json version must be semver (e.g. 1.2.3)"
+            exit 1
           fi
+
+          TAG="v$VERSION"
+
+          # Never allow main (or anything else weird)
+          if [[ "$TAG" == "main" ]]; then
+            echo "❌ ERROR: Refusing to create 'main' tag"
+            exit 1
+          fi
+
+          # Skip if tag already exists
+          if git tag | grep -q "^$TAG$"; then
+            echo "ℹ️ Tag $TAG already exists. Skipping release."
+            exit 0
+          fi
+
+          echo "🚀 Running release for $TAG"
+          npm run release
+
+      - name: 📤 Push commits and tags
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 📤 Push changes and tags
         run: |
           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}
-          git push origin HEAD --follow-tags
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          git push origin main
+          git push origin --tags
 
-      - name: 🏷️ Create GitHub Release with changelog
+      - name: 🏷️ Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
+          tag_name: v${{ github.ref_name }}
+          name: Release v${{ github.ref_name }}
           body_path: CHANGELOG.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
