@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File
 from fastapi.staticfiles import StaticFiles
 from fastapi.openapi.utils import get_openapi
 from pydantic import BaseModel
@@ -10,7 +10,7 @@ from modes.lifecoach import handle_lifecoach_mode
 from modes.fixit import handle_fixit_mode
 from modes.device_optimizer import optimize_device, DeviceState, OptimizationSuggestion
 from modes.kitchen import handle_kitchen_mode, KitchenInput, KitchenResponse
-
+from modes.fridge_scanner import handle_fridge_scan
 from storage.json_store import save_user_data, load_user_data
 from storage.user_profiles import save_profile, load_profile
 
@@ -61,6 +61,14 @@ async def run_device_optimizer(state: DeviceState):
 async def run_kitchen_mode(data: KitchenInput):
     return handle_kitchen_mode(data)
 
+@app.post("/fridge-scan")
+async def run_fridge_scan(file: UploadFile = File(...)):
+    result = handle_fridge_scan(file)
+    return {
+        "detected_ingredients": result.ingredients,
+        "recipe_suggestions": result.recipes
+    }
+
 @app.post("/save")
 async def save_data(req: SaveRequest):
     user_data = load_user_data(req.user_id)
@@ -98,7 +106,7 @@ def custom_openapi():
         routes=app.routes,
     )
     openapi_schema["servers"] = [
-        {"url": "https://zeke-unattaining-wendy.ngrok-free.dev"}  # Replace with your actual URL when deploying
+        {"url": "https://zeke-unattaining-wendy.ngrok-free.dev"}  # Replace for production
     ]
     app.openapi_schema = openapi_schema
     return app.openapi_schema
