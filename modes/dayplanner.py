@@ -1,6 +1,16 @@
+import os
 from typing import List, Dict
+from dotenv import load_dotenv
+from openai import OpenAI
+
+# Load environment variables
+load_dotenv()
+
+# Initialize OpenAI client (SDK v1+)
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+
 
 def generate_weekly_schedule(tasks: List[str]) -> Dict[str, List[str]]:
     """
@@ -20,13 +30,45 @@ def generate_weekly_schedule(tasks: List[str]) -> Dict[str, List[str]]:
     return schedule
 
 
+def extract_tasks_with_gpt(user_input: str) -> List[str]:
+    """
+    Uses GPT to extract a clean list of tasks from natural language input.
+    """
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "Extract 5–10 short, actionable personal tasks from the user's input. "
+                        "Return ONLY a plain list of tasks, one per line. No explanations."
+                    ),
+                },
+                {"role": "user", "content": user_input},
+            ],
+            max_tokens=200,
+            temperature=0.4,
+        )
+
+        content = response.choices[0].message.content or ""
+        tasks = [
+            line.strip("-• ").strip()
+            for line in content.splitlines()
+            if line.strip()
+        ]
+
+        return tasks
+
+    except Exception as e:
+        return [f"Failed to extract tasks: {str(e)}"]
+
+
 def handle_dayplanner_mode(user_input: str) -> Dict[str, List[str]]:
     """
-    Very basic example: extract tasks from user_input (comma-separated)
-    Later, you can use NLP/GPT to extract task lists intelligently.
+    GPT-powered DayPlanner:
+    1. Extract tasks with GPT
+    2. Generate a weekly schedule
     """
-    # Temporary: split tasks by commas or 'and'
-    user_input = user_input.replace(" and ", ", ")
-    tasks = [task.strip() for task in user_input.split(",") if task.strip()]
-
+    tasks = extract_tasks_with_gpt(user_input)
     return generate_weekly_schedule(tasks)
