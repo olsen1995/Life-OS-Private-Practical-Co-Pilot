@@ -1,12 +1,14 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.openapi.utils import get_openapi
 from pydantic import BaseModel
+from typing import List
 
 from mode_router import ModeRouter
 from modes.dayplanner import handle_dayplanner_mode
 from modes.lifecoach import handle_lifecoach_mode
 from modes.fixit import handle_fixit_mode
+from modes.device_optimizer import optimize_device, DeviceState, OptimizationSuggestion
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -17,7 +19,7 @@ app.mount("/.well-known", StaticFiles(directory=".well-known"), name="static")
 # Initialize the ModeRouter
 router = ModeRouter()
 
-# Input model
+# Input model for routing
 class UserInput(BaseModel):
     input: str
 
@@ -25,27 +27,13 @@ class UserInput(BaseModel):
 @app.post("/route")
 async def route_input(data: UserInput):
     mode = router.detect_mode(data.input)
+    result = router.handle_mode(mode, data.input)
+    return {"mode": mode, "result": result}
 
-    if mode == "DayPlanner":
-        return {
-            "mode": mode,
-            "result": handle_dayplanner_mode(data.input)
-        }
-
-    elif mode == "LifeCoach":
-        return {
-            "mode": mode,
-            "result": handle_lifecoach_mode(data.input)
-        }
-
-    elif mode == "FixIt":
-        return {
-            "mode": mode,
-            "result": handle_fixit_mode(data.input)
-        }
-
-    return {"mode": mode, "result": "No logic implemented yet."}
-
+# 🔧 New: Device Optimization endpoint
+@app.post("/device-optimizer", response_model=List[OptimizationSuggestion])
+async def run_device_optimizer(state: DeviceState):
+    return optimize_device(state)
 
 # Inject OpenAPI "servers" field so GPT plugin accepts the schema
 def custom_openapi():
