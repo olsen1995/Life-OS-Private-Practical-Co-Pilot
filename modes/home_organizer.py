@@ -1,33 +1,33 @@
 from openai import OpenAI
-from pydantic import BaseModel
+from dotenv import load_dotenv
+import os
 
-client = OpenAI()
+load_dotenv()
 
-class HomeOrganizerResponse(BaseModel):
-    summary: str
-    checklist: list[str]
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-def handle_home_organizer_mode(input_text: str) -> HomeOrganizerResponse:
+
+def handle_home_organizer_mode(user_input: str):
     prompt = f"""
-    You are a smart home organization assistant. A user said: "{input_text}"
+You are a professional home organization assistant.
 
-    Provide a short summary of what they should focus on, and a checklist of tasks to help them organize or clean.
-    """
+User request: {user_input}
 
-    response = client.chat.completions.create(
-        model="gpt-4",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.7,
-    )
+Return a step-by-step plan with clear sections.
+"""
 
-    raw_content = response.choices[0].message.content
-    content = raw_content.strip() if raw_content else ""
+    try:
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You help organize homes efficiently."},
+                {"role": "user", "content": prompt},
+            ],
+            temperature=0.7,
+        )
 
-    if "Checklist:" in content:
-        summary, checklist_block = content.split("Checklist:", 1)
-        checklist = [line.strip("-• ").strip() for line in checklist_block.strip().splitlines() if line.strip()]
-    else:
-        summary = content
-        checklist = []
+        content = response.choices[0].message.content
+        return {"plan": content.strip() if content else "No response from model."}
 
-    return HomeOrganizerResponse(summary=summary.strip(), checklist=checklist)
+    except Exception as e:
+        return {"error": str(e)}
