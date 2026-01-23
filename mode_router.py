@@ -3,7 +3,6 @@ from modes.fridge_scanner import handle_fridge_scan
 from modes.kitchen import handle_kitchen_mode, KitchenInput
 from modes.home_organizer import handle_home_organizer_mode
 
-
 def get_mode(input_text: str) -> str:
     input_text_lower = input_text.lower()
 
@@ -16,14 +15,15 @@ def get_mode(input_text: str) -> str:
     else:
         return "HomeOrganizer"
 
-
 class ModeRouter:
+    def detect_mode(self, input_text: str) -> str:
+        return get_mode(input_text)
+
     def handle_mode(self, mode: str, input_text: str):
         if mode == "Fixit":
             return handle_fixit_mode(input_text)
 
         elif mode == "Fridge":
-            # Placeholder UploadFile until real file upload is wired
             from fastapi import UploadFile
             from io import BytesIO
 
@@ -31,19 +31,15 @@ class ModeRouter:
                 filename="dummy.jpg",
                 file=BytesIO()
             )
-
             return handle_fridge_scan(dummy_file)
 
         elif mode == "Kitchen":
-            # ✅ FIX: fridge_items and pantry_items MUST be List[str]
-
             kitchen_input = KitchenInput(
                 fridge_items=["milk", "eggs"],
                 pantry_items=["rice", "beans"],
                 goal="make a healthy dinner",
                 user_id="user_123"
             )
-
             return handle_kitchen_mode(kitchen_input)
 
         else:

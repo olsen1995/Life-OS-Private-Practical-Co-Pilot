@@ -70,8 +70,8 @@ async def run_kitchen_mode(data: KitchenInput):
 async def run_fridge_scan(file: UploadFile = File(...)):
     result = handle_fridge_scan(file)
     return {
-        "detected_ingredients": result.ingredients,
-        "recipe_suggestions": result.recipes
+        "detected_ingredients": result["ingredients"],
+        "recipe_suggestions": result["recipes"]
     }
 
 @app.post("/save")

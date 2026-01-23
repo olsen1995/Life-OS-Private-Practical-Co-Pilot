@@ -40,4 +40,4 @@ def test_invalid_mode():
         "/route",
         json={"mode": "InvalidMode", "input_text": "This should fail"}
     )
-    assert response.status_code in [400, 422]
+    assert response.status_code in [400, 422]Get-ChildItem -Recurse -Include *.py -Exclude .venv | Select-String "app = FastAPI()"
