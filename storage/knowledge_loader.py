@@ -1,19 +1,17 @@
 import json
 from pathlib import Path
-import pandas as pd
+from typing import Dict, Any
 
 class KnowledgeLoader:
-    def __init__(self, plugins_dir="plugins"):
+    def __init__(self, plugins_dir: str = "plugins"):
         self.plugins_dir = Path(plugins_dir)
-        self.data = {}
 
-    def load_all(self):
+    def load_all(self) -> Dict[str, Any]:
+        data = {}
         for file in self.plugins_dir.glob("*.*"):
             if file.suffix.lower() == ".json":
                 with open(file, "r", encoding="utf-8") as f:
-                    self.data[file.stem] = json.load(f)
-            elif file.suffix.lower() == ".csv":
-                self.data[file.stem] = pd.read_csv(file)
+                    data[file.stem] = json.load(f)
             else:
-                self.data[file.stem] = str(file.resolve())  # path to image or other files
-        return self.data
+                data[file.stem] = str(file.resolve())
+        return data

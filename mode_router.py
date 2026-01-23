@@ -1,58 +1,56 @@
+# mode_router.py
+
 from modes.fixit import handle_fixit_mode
 from modes.fridge_scanner import handle_fridge_scan
 from modes.kitchen import handle_kitchen_mode, KitchenInput
 from modes.home_organizer import handle_home_organizer_mode
+from storage.knowledge_loader import KnowledgeLoader
+from fastapi import UploadFile
+from io import BytesIO
+from typing import Dict, Any
 
-from PIL import Image
-import io
-
-
-def get_mode(input_text: str) -> str:
-    input_text_lower = input_text.lower()
-
-    if "fix" in input_text_lower:
-        return "Fixit"
-    elif "fridge" in input_text_lower or "scan" in input_text_lower:
-        return "Fridge"
-    elif "kitchen" in input_text_lower or "cook" in input_text_lower:
-        return "Kitchen"
-    else:
-        return "HomeOrganizer"
+# Load knowledge once for all modes
+knowledge: Dict[str, Any] = KnowledgeLoader().load_all()
 
 
 class ModeRouter:
     def detect_mode(self, input_text: str) -> str:
-        return get_mode(input_text)
+        """
+        Detect the mode based on keywords in the input text.
+        """
+        text = input_text.lower()
+        if "fix" in text:
+            return "Fixit"
+        elif "fridge" in text or "scan" in text:
+            return "Fridge"
+        elif "kitchen" in text or "cook" in text:
+            return "Kitchen"
+        else:
+            return "HomeOrganizer"
 
-    def handle_mode(self, mode: str, input_text: str):
+    def handle_mode(self, mode: str, input_text: str, user_id: str = "user_123"):
+        """
+        Route the input to the appropriate mode handler.
+        """
         if mode == "Fixit":
-            return handle_fixit_mode(input_text)
+            # Pass knowledge and user_id to Fixit
+            return handle_fixit_mode(input_text, knowledge=knowledge, user_id=user_id)
 
         elif mode == "Fridge":
-            from fastapi import UploadFile
-
-            # ✅ Create a valid blank image in memory
-            blank_image = Image.new("RGB", (100, 100), "white")
-            image_bytes = io.BytesIO()
-            blank_image.save(image_bytes, format="PNG")
-            image_bytes.seek(0)
-
-            # ✅ UploadFile does NOT take content_type
-            dummy_file = UploadFile(
-                filename="dummy.png",
-                file=image_bytes
-            )
-
-            return handle_fridge_scan(dummy_file)
+            # Use a dummy UploadFile for testing
+            dummy_file = UploadFile(filename="dummy.jpg", file=BytesIO())
+            return handle_fridge_scan(dummy_file, knowledge=knowledge, user_id=user_id)
 
         elif mode == "Kitchen":
+            # Provide kitchen input
             kitchen_input = KitchenInput(
                 fridge_items=["milk", "eggs"],
                 pantry_items=["rice", "beans"],
                 goal="make a healthy dinner",
-                user_id="user_123"
+                user_id=user_id
             )
-            return handle_kitchen_mode(kitchen_input)
+            return handle_kitchen_mode(kitchen_input, knowledge=knowledge)
 
         else:
-            return handle_home_organizer_mode(input_text)
+            # Home Organizer
+            return handle_home_organizer_mode(input_text, knowledge=knowledge, user_id=user_id)

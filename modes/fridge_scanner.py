@@ -1,32 +1,24 @@
-from fastapi import UploadFile
-from openai import OpenAI
 from PIL import Image
 import pytesseract
-import io
-from dotenv import load_dotenv
-import os
+from fastapi import UploadFile
+from typing import List, Dict, Any
 
-load_dotenv()
+class FridgeScanResult:
+    def __init__(self, ingredients=None, recipes=None):
+        self.ingredients = ingredients or []
+        self.recipes = recipes or []
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
-def handle_fridge_scan(file: UploadFile):
+def handle_fridge_scan(file: UploadFile, knowledge: dict, user_id: str) -> FridgeScanResult:
     contents = file.file.read()
-    image = Image.open(io.BytesIO(contents))
+    try:
+        image = Image.open(file.file)
+        text = pytesseract.image_to_string(image)
+        ingredients = [line.strip() for line in text.split("\n") if line.strip()]
+    except:
+        ingredients = []
 
-    # OCR with pytesseract
-    text = pytesseract.image_to_string(image)
+    # Use knowledge for user-specific recipes
+    user_data = knowledge.get(user_id, {})
+    recipes = user_data.get("recipes", [])
 
-    # Ask GPT to interpret the text as ingredients
-    prompt = f"Given the following text extracted from a fridge scan image, identify the list of ingredients or items:\n\n{text}"
-
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",  # publicly accessible + vision capable
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.5,
-    )
-
-    message = response.choices[0].message
-    ingredients = message.content.strip() if message and message.content else "Could not extract ingredients."
-
-    return {"extracted_ingredients": ingredients}
+    return FridgeScanResult(ingredients=ingredients, recipes=recipes)
