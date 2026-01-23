@@ -3,6 +3,7 @@ from modes.dayplanner import handle_dayplanner_mode
 from modes.lifecoach import handle_lifecoach_mode
 from modes.fixit import handle_fixit_mode
 from modes.device_optimizer import optimize_device, DeviceState, OptimizationSuggestion
+from modes.kitchen import handle_kitchen_mode, KitchenInput
 
 
 class ModeRouter:
@@ -61,10 +62,15 @@ class ModeRouter:
             return handle_fixit_mode(user_input)
 
         elif mode == "Device Optimization":
-            # For interactive optimization, return schema hint
             return {
                 "message": "Please provide system details (OS, RAM, disk space, etc.) to optimize.",
                 "schema": DeviceState.schema()
+            }
+
+        elif mode == "Kitchen":
+            return {
+                "message": "Please provide fridge and pantry items + dietary goal.",
+                "schema": KitchenInput.schema()
             }
 
         return "No logic implemented yet."
