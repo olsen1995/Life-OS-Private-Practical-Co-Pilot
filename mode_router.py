@@ -1,4 +1,8 @@
 from typing import Dict, List, Tuple
+from modes.dayplanner import handle_dayplanner_mode
+from modes.lifecoach import handle_lifecoach_mode
+from modes.fixit import handle_fixit_mode
+from modes.device_optimizer import optimize_device, DeviceState, OptimizationSuggestion
 
 
 class ModeRouter:
@@ -39,10 +43,28 @@ class ModeRouter:
         if not matched_modes:
             return "Unknown"
 
-        # ✅ Pylance-safe max() usage
         best_match: Tuple[str, int] = max(
             matched_modes.items(),
             key=lambda item: item[1]
         )
 
         return best_match[0]
+
+    def handle_mode(self, mode: str, user_input: str):
+        if mode == "DayPlanner":
+            return handle_dayplanner_mode(user_input)
+
+        elif mode == "LifeCoach":
+            return handle_lifecoach_mode(user_input)
+
+        elif mode == "FixIt":
+            return handle_fixit_mode(user_input)
+
+        elif mode == "Device Optimization":
+            # For interactive optimization, return schema hint
+            return {
+                "message": "Please provide system details (OS, RAM, disk space, etc.) to optimize.",
+                "schema": DeviceState.schema()
+            }
+
+        return "No logic implemented yet."
