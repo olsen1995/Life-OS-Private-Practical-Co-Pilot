@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.openapi.utils import get_openapi
 from pydantic import BaseModel
-from mode_router import ModeRouter
+from mode_router import ModeRouter, run_mode_logic
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -21,7 +21,11 @@ class UserInput(BaseModel):
 @app.post("/route")
 async def route_input(data: UserInput):
     mode = router.detect_mode(data.input)
-    return {"mode": mode}
+    result = run_mode_logic(mode, data.input)
+    return {
+        "mode": mode,
+        "result": result
+    }
 
 # Inject OpenAPI "servers" field so GPT plugin accepts the schema
 def custom_openapi():
@@ -34,7 +38,7 @@ def custom_openapi():
         routes=app.routes,
     )
     openapi_schema["servers"] = [
-        {"url": "https://zeke-unattaining-wendy.ngrok-free.dev"}  # Replace with your actual ngrok URL
+        {"url": "https://zeke-unattaining-wendy.ngrok-free.dev"}  # Replace this URL when deployed
     ]
     app.openapi_schema = openapi_schema
     return app.openapi_schema
