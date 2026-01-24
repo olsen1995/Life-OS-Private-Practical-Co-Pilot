@@ -4,7 +4,7 @@ from modes.kitchen import handle_kitchen_mode, KitchenInput
 from modes.home_organizer import handle_home_organizer_mode
 from storage.knowledge_loader import KnowledgeLoader
 
-# Load knowledge once for all modes
+# Load knowledge once
 knowledge = KnowledgeLoader().load_all()
 
 class ModeRouter:
