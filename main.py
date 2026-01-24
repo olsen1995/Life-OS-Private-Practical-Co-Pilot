@@ -14,7 +14,7 @@ knowledge = KnowledgeLoader().load_all()
 
 class UserInput(BaseModel):
     input: str
-    user_id: str = "user_123"
+    user_id: str = "user_123"  # default
 
 @app.get("/knowledge")
 async def list_knowledge():

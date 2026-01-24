@@ -1,23 +1,14 @@
-# mode_router.py
-
 from modes.fixit import handle_fixit_mode
 from modes.fridge_scanner import handle_fridge_scan
 from modes.kitchen import handle_kitchen_mode, KitchenInput
 from modes.home_organizer import handle_home_organizer_mode
 from storage.knowledge_loader import KnowledgeLoader
-from fastapi import UploadFile
-from io import BytesIO
-from typing import Dict, Any
 
 # Load knowledge once for all modes
-knowledge: Dict[str, Any] = KnowledgeLoader().load_all()
-
+knowledge = KnowledgeLoader().load_all()
 
 class ModeRouter:
     def detect_mode(self, input_text: str) -> str:
-        """
-        Detect the mode based on keywords in the input text.
-        """
         text = input_text.lower()
         if "fix" in text:
             return "Fixit"
@@ -29,20 +20,14 @@ class ModeRouter:
             return "HomeOrganizer"
 
     def handle_mode(self, mode: str, input_text: str, user_id: str = "user_123"):
-        """
-        Route the input to the appropriate mode handler.
-        """
         if mode == "Fixit":
-            # Pass knowledge and user_id to Fixit
             return handle_fixit_mode(input_text, knowledge=knowledge, user_id=user_id)
-
         elif mode == "Fridge":
-            # Use a dummy UploadFile for testing
+            from fastapi import UploadFile
+            from io import BytesIO
             dummy_file = UploadFile(filename="dummy.jpg", file=BytesIO())
             return handle_fridge_scan(dummy_file, knowledge=knowledge, user_id=user_id)
-
         elif mode == "Kitchen":
-            # Provide kitchen input
             kitchen_input = KitchenInput(
                 fridge_items=["milk", "eggs"],
                 pantry_items=["rice", "beans"],
@@ -50,7 +35,5 @@ class ModeRouter:
                 user_id=user_id
             )
             return handle_kitchen_mode(kitchen_input, knowledge=knowledge)
-
         else:
-            # Home Organizer
             return handle_home_organizer_mode(input_text, knowledge=knowledge, user_id=user_id)

@@ -1,5 +1,10 @@
-from typing import Optional, Dict, Any
+from typing import Dict, Any
 
-def handle_fixit_mode(input_text: str, knowledge: Optional[Dict[str, Any]] = None, user_id: Optional[str] = None):
-    # Replace with your real fixit logic
-    return {"message": "Fixit mode handled", "input": input_text}
+def handle_fixit_mode(input_text: str, knowledge: Dict[str, Any] = {}, user_id: str = "user_123"):
+    # Example fixit response
+    user_data = knowledge.get(user_id, {})
+    fixit_instructions = user_data.get("fixit_instructions", [])
+    return {
+        "input": input_text,
+        "instructions": fixit_instructions or ["No fixit instructions found."]
+    }

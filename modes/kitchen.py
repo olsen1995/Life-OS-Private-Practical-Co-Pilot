@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 
 class KitchenInput(BaseModel):
     fridge_items: List[str]
@@ -13,8 +13,8 @@ class KitchenResponse(BaseModel):
     fridge_items: List[str]
     pantry_items: List[str]
 
-def handle_kitchen_mode(data: KitchenInput, knowledge: Optional[Dict[str, Any]] = None) -> KitchenResponse:
-    user_data = knowledge.get(data.user_id, {}) if knowledge else {}
+def handle_kitchen_mode(data: KitchenInput, knowledge: Dict[str, Any] = {}) -> KitchenResponse:
+    user_data = knowledge.get(data.user_id, {})
     kitchen_plan = user_data.get("kitchen_plan", {})
 
     goal = kitchen_plan.get("goal", data.goal)
