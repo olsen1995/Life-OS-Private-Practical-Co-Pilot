@@ -1,15 +1,54 @@
-# Ignore node dependencies
-node_modules/
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
 
-# Ignore build output
-dist/
+# Virtual environments
+.venv/
+env/
+venv/
 
-# Ignore VSCode settings
+# dotenv
+.env
+.env.*
+
+# VSCode settings
 .vscode/
 
-# Ignore logs and environment files
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Logs and temp files
 *.log
-.env
-.DS_Store
-__pycache__/
-*.pyc
+*.pid
+*.sqlite3
+
+# Pytest cache
+.pytest_cache/
+
+# Docker
+*.pid
+*.seed
+*.pid.lock
+*.zip
+*.tar.gz
+
+# Node (if used)
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
