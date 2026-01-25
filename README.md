@@ -1,84 +1,85 @@
 # 🧠 LifeOS Co-Pilot
 
-An AI-augmented FastAPI application designed to assist with daily life organization, task management, and personal knowledge routing through modular “modes”.
+An AI-augmented FastAPI application to help you manage daily life using modular "modes" — now powered by OpenAI and deployable on Render.
 
 ---
 
 ## 🚀 Features
 
-- 📦 FastAPI backend with mode routing (Fixit, Fridge, Kitchen, Organizer)
-- 📚 JSON-based user knowledge system
-- 🧠 OCR (image-to-text) for fridge scanning using `pytesseract`
-- 🧪 Unit & API tests with `pytest`
-- 🐳 Docker-ready for deployment
-- 🔐 Secrets-ready with `.env.example`
+- ⚡ Mode-based modular architecture (Fixit, Kitchen, Organizer, etc.)
+- 🤖 AI-powered chat using OpenAI (via `/chat`)
+- 🧠 Custom knowledge routing for personalized assistance
+- 🧪 Pytest-integrated test suite
+- 🐳 Docker-ready
+- 🔐 `.env.example` for safe secret storage
+- ☁️ Ready for Render deployment with `render.yaml`
+- ✅ CI/CD with GitHub Actions
+- 🧼 Pre-commit config with `black`, `flake8`, and `isort`
 
 ---
 
-## ⚙️ Getting Started
-
-### 🔧 1. Install Dependencies
+## 🧪 Local Development
 
 ```bash
+# Install dependencies
 pip install -r requirements.txt
-```
 
-### 🧪 2. Run Tests
-
-```bash
+# Run tests
 pytest tests/
-```
 
-### 🏃 3. Run the App (Locally)
-
-```bash
+# Start the app
 uvicorn main:app --reload
 ```
 
-Then visit: [http://localhost:8000/docs](http://localhost:8000/docs)
+Visit [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ---
 
-## 🐳 Docker Support
+## 💬 AI Chat Mode
 
-### 📦 Build the Image
+POST to `/chat`:
 
-```bash
-docker build -t lifeos-api .
+```json
+{
+  "input": "What's in my fridge?"
+}
 ```
 
-### 🚀 Run the Container
+Your `.env` must contain:
 
-```bash
-docker run -p 8000:8000 lifeos-api
-```
-
----
-
-## 🔐 Environment Variables
-
-Copy `.env.example` into a real `.env`:
-
-```bash
-cp .env.example .env
-```
-
-Then fill in secrets like:
-
-```
+```env
 OPENAI_API_KEY=your-key-here
 ```
 
 ---
 
-## 🧪 Testing with Docker (Optional)
+## 🐳 Docker Support
 
 ```bash
-docker run --rm lifeos-api pytest tests/
+docker build -t lifeos-api .
+docker run -p 8000:8000 lifeos-api
+```
+
+---
+
+## ☁️ Deploy to Render
+
+Render auto-detects `render.yaml`:
+- Click “New Web Service” → connect your GitHub repo
+- Add `OPENAI_API_KEY` as an env var in the dashboard
+- Deploy
+
+---
+
+## ✅ Pre-Commit Hooks
+
+```bash
+pip install pre-commit
+pre-commit install
 ```
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+MIT License — free to use, modify, and share.

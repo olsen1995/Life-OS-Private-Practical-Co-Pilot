@@ -13,6 +13,9 @@ from pydantic import BaseModel
 from mode_router import ModeRouter
 from storage.knowledge_loader import KnowledgeLoader
 
+import openai
+from fastapi.responses import JSONResponse
+
 # Initialize FastAPI app
 app = FastAPI()
 
@@ -38,6 +41,21 @@ async def route_input(data: UserInput):
     mode = router.detect_mode(data.input)
     result = router.handle_mode(mode, data.input, user_id=data.user_id)
     return {"mode": mode, "result": result}
+
+@app.post("/chat")
+async def chat_endpoint(data: UserInput):
+    openai.api_key = os.getenv("OPENAI_API_KEY")
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant named LifeOS."},
+                {"role": "user", "content": data.input}
+            ]
+        )
+        return {"response": response.choices[0].message["content"]}
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
 
 if __name__ == "__main__":
     import uvicorn
