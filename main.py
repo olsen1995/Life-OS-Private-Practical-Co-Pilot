@@ -1,53 +1,49 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import JSONResponse, FileResponse
 from pydantic import BaseModel
-from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-from openai import OpenAI
 import os
+import openai
 
-# Load environment variables locally (.env) – Render already injects them
+# Load .env
 load_dotenv()
 
-# Get the OpenAI API key
-api_key = os.getenv("OPENAI_API_KEY")
-if not api_key:
-    raise RuntimeError("❌ OPENAI_API_KEY is missing. Set it in .env or Render.")
+# Get API key
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-# Initialize OpenAI client (v2+ style)
-client = OpenAI(api_key=api_key)
+if not OPENAI_API_KEY:
+    raise RuntimeError("❌ OPENAI_API_KEY is missing. Please set it in .env or Render.")
 
-# Setup FastAPI app
+# ✅ Create OpenAI client (new v2 syntax)
+client = openai.OpenAI(api_key=OPENAI_API_KEY)
+
 app = FastAPI()
 
-# Optional: allow frontend connections (adjust origin in production)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Health check route
-@app.get("/healthz")
-def health_check():
-    return {"status": "ok"}
-
-# Request model
 class PromptRequest(BaseModel):
     prompt: str
 
-# POST /ask endpoint — GPT chat
 @app.post("/ask")
-def ask_gpt(req: PromptRequest):
+async def ask_question(data: PromptRequest):
     try:
-        chat_response = client.chat.completions.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": req.prompt}
+                {"role": "user", "content": data.prompt}
             ]
         )
-        return {"response": chat_response.choices[0].message.content}
+        return {"response": response.choices[0].message.content}
+
     except Exception as e:
-        return {"error": str(e)}
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/openapi.json")
+def get_openapi():
+    return FileResponse("openapi.json", media_type="application/json")
+
+
+@app.get("/")
+def root():
+    return {
+        "message": "✅ Life-OS API is live. Use POST /ask with { 'prompt': 'your question' }."
+    }
