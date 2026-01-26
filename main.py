@@ -1,14 +1,16 @@
-
 import os
-from typing import Optional
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from typing import Optional, Any
+
+from fastapi import FastAPI, Request
 from dotenv import load_dotenv
 from openai import OpenAI
 
 from mode_router import ModeRouter
-from response_formatter import format_response, format_error, chunk_for_adhd
+from response_formatter import (
+    format_response,
+    format_error,
+    chunk_for_adhd,
+)
 
 # ------------------------------------------------------------
 # Load environment variables
@@ -33,15 +35,6 @@ client = OpenAI(api_key=api_key)
 # ------------------------------------------------------------
 app = FastAPI()
 
-# Optional CORS setup (uncomment if needed)
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["*"],
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
-
 # ------------------------------------------------------------
 # Mode Router Instance
 # ------------------------------------------------------------
@@ -54,26 +47,35 @@ router = ModeRouter()
 async def ask(request: Request):
     try:
         data = await request.json()
-        user_message = data.get("message", "")
-        user_id = data.get("user_id", "user_123")
-        adhd_mode = data.get("adhd_mode", False)
+        user_message: str = data.get("message", "")
+        user_id: str = data.get("user_id", "user_123")
+        adhd_mode: bool = data.get("adhd_mode", False)
 
         mode = router.route_request(user_message)
-        response_data = router.handle_mode(mode, user_message, user_id=user_id)
+
+        # Get the response and normalize to dict
+        raw_result: Any = router.handle_mode(mode, user_message, user_id=user_id)
+        if hasattr(raw_result, "dict"):
+            response_data = raw_result.dict()
+        else:
+            response_data = dict(raw_result) if isinstance(raw_result, dict) else {}
+
+        summary = response_data.get("summary", "Here's the result.")
+        steps = response_data.get("steps", [])
+        actions = response_data.get("actions", [])
+        priority = response_data.get("priority", "normal")
 
         if adhd_mode:
-            return chunk_for_adhd(
-                summary=response_data.get("summary", "Here's the info."),
-                steps=response_data.get("steps", []),
-                actions=response_data.get("actions", [])
-            )
+            return chunk_for_adhd(summary=summary, steps=steps, actions=actions)
         else:
-            return format_response(
-                summary=response_data.get("summary", "Here's the result."),
-                steps=response_data.get("steps", []),
-                priority=response_data.get("priority", "normal"),
-                actions=response_data.get("actions", [])
-            )
+            return format_response(summary=summary, steps=steps, priority=priority, actions=actions)
 
     except Exception as e:
         return format_error(str(e))
+
+
+# ------------------------------------------------------------
+# Start the scheduler
+# ------------------------------------------------------------
+from scheduler import start_scheduler
+start_scheduler()
