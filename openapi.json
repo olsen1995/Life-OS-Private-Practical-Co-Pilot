@@ -1,8 +1,75 @@
 {
-  "openapi": "3.0.1",
+  "openapi": "3.1.0",
   "info": {
     "title": "LifeOS Co-Pilot API",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "description": "API for managing memory, tasks, and general queries for LifeOS Co-Pilot."
   },
-  "paths": {}
+  "servers": [
+    {
+      "url": "https://life-os-private-practical-co-pilot.onrender.com"
+    }
+  ],
+  "paths": {
+    "/ask": {
+      "post": {
+        "operationId": "askQuestion",
+        "summary": "Send a general question to the LifeOS Co-Pilot.",
+        "description": "Endpoint for handling general AI-related questions using natural language.",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "user_id": {
+                    "type": "string",
+                    "default": "guest_123"
+                  },
+                  "prompt": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "prompt"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The AI response from LifeOS Co-Pilot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "response": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-api-key"
+      }
+    }
+  }
 }
