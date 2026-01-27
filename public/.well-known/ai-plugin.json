@@ -6,7 +6,8 @@
   "description_for_model": "Use this plugin to help manage reminders, tasks, and memory.",
   "auth": {
     "type": "api_key",
-    "api_key_name": "x-api-key"
+    "api_key_name": "x-api-key",
+    "location": "header"
   },
   "api": {
     "type": "openapi",
