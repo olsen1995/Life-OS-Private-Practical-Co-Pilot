@@ -14,12 +14,10 @@
     "/ask": {
       "post": {
         "operationId": "askQuestion",
-        "summary": "Send a general question to the LifeOS Co-Pilot.",
+        "summary": "Send a general question",
         "description": "Handles general AI queries using natural language.",
         "security": [
-          {
-            "ApiKeyAuth": []
-          }
+          { "ApiKeyAuth": [] }
         ],
         "requestBody": {
           "required": true,
@@ -36,16 +34,14 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "prompt"
-                ]
+                "required": ["prompt"]
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "The AI response from LifeOS Co-Pilot",
+            "description": "AI response",
             "content": {
               "application/json": {
                 "schema": {
@@ -62,21 +58,18 @@
         }
       }
     },
+
     "/memory": {
       "get": {
         "operationId": "getMemory",
-        "summary": "Get memory items for a user.",
-        "description": "Retrieves saved memory data for the specified user.",
+        "summary": "Get memory items",
         "security": [
-          {
-            "ApiKeyAuth": []
-          }
+          { "ApiKeyAuth": [] }
         ],
         "parameters": [
           {
             "name": "user_id",
             "in": "query",
-            "required": false,
             "schema": {
               "type": "string",
               "default": "guest_123"
@@ -85,7 +78,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Array of memory entries.",
+            "description": "Memory list",
             "content": {
               "application/json": {
                 "schema": {
@@ -93,12 +86,8 @@
                   "items": {
                     "type": "object",
                     "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "content": {
-                        "type": "string"
-                      },
+                      "id": { "type": "string" },
+                      "content": { "type": "string" },
                       "timestamp": {
                         "type": "string",
                         "format": "date-time"
@@ -113,12 +102,9 @@
       },
       "post": {
         "operationId": "addMemory",
-        "summary": "Add a new memory item.",
-        "description": "Adds or updates a memory entry for the specified user.",
+        "summary": "Add memory",
         "security": [
-          {
-            "ApiKeyAuth": []
-          }
+          { "ApiKeyAuth": [] }
         ],
         "requestBody": {
           "required": true,
@@ -135,160 +121,29 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "content"
-                ]
+                "required": ["content"]
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "Memory item created or updated.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "status": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
+            "description": "Memory stored"
           }
         }
       }
     },
-    "/api-keys": {
-      "get": {
-        "operationId": "getApiKeys",
-        "summary": "Get list of connected API keys.",
-        "description": "Returns third-party service keys connected for the user.",
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "user_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "guest_123"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of service keys.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "service": {
-                        "type": "string"
-                      },
-                      "key": {
-                        "type": "string"
-                      },
-                      "connected": {
-                        "type": "boolean"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "operationId": "addApiKey",
-        "summary": "Add a third-party API key.",
-        "description": "Stores an API key for services like Notion, Google Calendar, etc.",
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "user_id": {
-                    "type": "string",
-                    "default": "guest_123"
-                  },
-                  "service": {
-                    "type": "string"
-                  },
-                  "key": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "service",
-                  "key"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "API key stored successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
+
     "/tasks": {
       "get": {
         "operationId": "getTasks",
-        "summary": "Get user tasks",
-        "description": "Returns all tasks for the user.",
+        "summary": "Get tasks",
         "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "user_id",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "default": "guest_123"
-            }
-          }
+          { "ApiKeyAuth": [] }
         ],
         "responses": {
           "200": {
-            "description": "List of tasks",
+            "description": "Task list",
             "content": {
               "application/json": {
                 "schema": {
@@ -296,15 +151,9 @@
                   "items": {
                     "type": "object",
                     "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "title": {
-                        "type": "string"
-                      },
-                      "completed": {
-                        "type": "boolean"
-                      },
+                      "id": { "type": "string" },
+                      "title": { "type": "string" },
+                      "completed": { "type": "boolean" },
                       "due": {
                         "type": "string",
                         "format": "date-time"
@@ -319,12 +168,9 @@
       },
       "post": {
         "operationId": "createTask",
-        "summary": "Create a new task",
-        "description": "Creates a new task for the user.",
+        "summary": "Create task",
         "security": [
-          {
-            "ApiKeyAuth": []
-          }
+          { "ApiKeyAuth": [] }
         ],
         "requestBody": {
           "required": true,
@@ -333,65 +179,38 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "user_id": {
-                    "type": "string",
-                    "default": "guest_123"
-                  },
-                  "title": {
-                    "type": "string"
-                  },
+                  "title": { "type": "string" },
                   "due": {
                     "type": "string",
                     "format": "date-time"
                   }
                 },
-                "required": [
-                  "title"
-                ]
+                "required": ["title"]
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "Task created successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "status": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
+            "description": "Task created"
           }
         }
       }
     },
+
     "/tasks/{id}": {
       "patch": {
         "operationId": "updateTask",
-        "summary": "Update a task",
-        "description": "Updates task fields such as title, completion status, or due date.",
+        "summary": "Update task",
         "security": [
-          {
-            "ApiKeyAuth": []
-          }
+          { "ApiKeyAuth": [] }
         ],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           }
         ],
         "requestBody": {
@@ -401,16 +220,8 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "title": {
-                    "type": "string"
-                  },
-                  "completed": {
-                    "type": "boolean"
-                  },
-                  "due": {
-                    "type": "string",
-                    "format": "date-time"
-                  }
+                  "title": { "type": "string" },
+                  "completed": { "type": "boolean" }
                 }
               }
             }
@@ -418,39 +229,22 @@
         },
         "responses": {
           "200": {
-            "description": "Task updated successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
+            "description": "Task updated"
           }
         }
       },
       "delete": {
         "operationId": "deleteTask",
-        "summary": "Delete a task",
-        "description": "Deletes a task permanently.",
+        "summary": "Delete task",
         "security": [
-          {
-            "ApiKeyAuth": []
-          }
+          { "ApiKeyAuth": [] }
         ],
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           }
         ],
         "responses": {
@@ -461,7 +255,9 @@
       }
     }
   },
+
   "components": {
+    "schemas": {},
     "securitySchemes": {
       "ApiKeyAuth": {
         "type": "apiKey",
