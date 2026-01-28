@@ -1,15 +1,21 @@
 {
   "schema_version": "v1",
+  "name_for_model": "life_os_plugin",
   "name_for_human": "LifeOS Co-Pilot",
-  "name_for_model": "lifeos_co_pilot",
-  "description_for_human": "A private assistant for reminders, memory, tasks, and household help.",
-  "description_for_model": "Use this plugin to help manage reminders, tasks, and memory.",
-  "auth": { "type": "none" },
+  "description_for_model": "A plugin that uses GPT-4o to manage memory, tasks, reminders, and personal assistant queries.",
+  "description_for_human": "Manage life and tasks using natural language. Backed by GPT-4o.",
+  "auth": {
+    "type": "api_key",
+    "authorization_type": "header",
+    "verification_tokens": {},
+    "api_key_header_name": "x-api-key"
+  },
   "api": {
     "type": "openapi",
-    "url": "https://life-os-private-practical-co-pilot.onrender.com/openapi.json"
+    "url": "https://gist.githubusercontent.com/olsen1995/f42f916142453bebc363b4d7d455ae75/raw/35177ef94ccd3121cee1ba2d733afab5479d884f/lifeos-openapi.json",
+    "is_user_authenticated": false
   },
-  "logo_url": "https://life-os-private-practical-co-pilot.onrender.com/logo.png",
-  "contact_email": "support@example.com",
-  "legal_info_url": "https://example.com/legal"
+  "logo_url": "https://via.placeholder.com/128.png?text=LifeOS",
+  "contact_email": "you@example.com",
+  "legal_info_url": "https://yourdomain.com/legal"
 }

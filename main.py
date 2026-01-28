@@ -1,23 +1,17 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Path, Header, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
+from pydantic.v1 import SecretStr
 import os
-from dotenv import load_dotenv
+from typing import List, Optional
 
-# ✅ LangChain v1+ Correct Imports
-from langchain_core.prompts import PromptTemplate
-from langchain.chains import LLMChain
-from langchain_openai import OpenAI
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
 
-# Load environment variables
-load_dotenv()
-
-# Create FastAPI app
 app = FastAPI()
 
-# Allow CORS (useful for dev/testing)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -26,85 +20,113 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# -----------------------------
-# Static Files for Plugin Support
-# -----------------------------
-
-# Serve the .well-known folder (legacy plugin support)
 app.mount(
     "/.well-known",
-    StaticFiles(directory=os.path.join(os.getcwd(), "static", "well-known")),
+    StaticFiles(directory="static/well-known"),
     name="well-known",
 )
 
-# Serve openapi.json from root
-@app.get("/openapi.json")
-async def get_openapi():
-    return FileResponse("openapi.json")
+@app.get("/.well-known/openapi.json")
+async def serve_openapi():
+    return FileResponse("static/well-known/openapi.json")
 
+# In-memory data (for demo)
+memory_store = []
+task_store = []
+task_id_counter = 1
 
-# Health check route
-@app.get("/ping")
-def ping():
-    return {"message": "pong"}
+# ----------------------------
+# Models
 
-
-# -----------------------------
-# ✅ /ask Endpoint (Custom GPT)
-# -----------------------------
-
-# Load OpenAI key from .env
-openai_api_key = os.getenv("OPENAI_API_KEY")
-
-# ✅ Correct OpenAI initialization for LangChain v1+
-llm = OpenAI(
-    temperature=0.7,
-    openai_api_key=openai_api_key
-)
-
-# Prompt template
-template = """
-You are a helpful assistant helping someone reduce overwhelm and gain emotional clarity.
-
-User question: {prompt}
-
-Give a thoughtful, supportive, actionable response.
-"""
-
-prompt_template = PromptTemplate(
-    input_variables=["prompt"],
-    template=template
-)
-
-# Chain
-llm_chain = LLMChain(
-    llm=llm,
-    prompt=prompt_template
-)
-
-
-# Request + Response Models
-class AskRequest(BaseModel):
-    user_id: str
+class PromptRequest(BaseModel):
     prompt: str
 
+class MemoryItem(BaseModel):
+    text: str
 
-class AskResponse(BaseModel):
-    response: str
+class Task(BaseModel):
+    id: Optional[int] = None
+    title: str
+    completed: Optional[bool] = False
+
+# ----------------------------
+# Auth Helper
+
+def validate_api_key(x_api_key: str = Header(None)):
+    expected_key = os.getenv("LIFEOS_API_KEY")
+    if not expected_key or x_api_key != expected_key:
+        raise HTTPException(status_code=401, detail="Invalid or missing API key.")
+
+# ----------------------------
+# Routes
+
+@app.post("/ask")
+async def ask_question(request: PromptRequest, x_api_key: str = Header(None)):
+    validate_api_key(x_api_key)
+
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+    if not openai_api_key:
+        return {"error": "Missing OPENAI_API_KEY"}
+
+    llm = ChatOpenAI(
+        model="gpt-4o",
+        temperature=0.7,
+        api_key=SecretStr(openai_api_key),
+    )
+
+    prompt = ChatPromptTemplate.from_template("You are a helpful assistant. {input}")
+    chain = prompt | llm
+    result = chain.invoke({"input": request.prompt})
+
+    return {"response": result.content}
 
 
-# ✅ Main GPT endpoint
-@app.post("/ask", response_model=AskResponse)
-async def ask_route(payload: AskRequest):
-    try:
-        print(f"Prompt from {payload.user_id}: {payload.prompt}")
+@app.get("/memory")
+def get_memory(x_api_key: str = Header(None)):
+    validate_api_key(x_api_key)
+    return {"memory": memory_store}
 
-        answer = llm_chain.run(payload.prompt)
 
-        return AskResponse(response=answer)
+@app.post("/memory")
+def add_memory(item: MemoryItem, x_api_key: str = Header(None)):
+    validate_api_key(x_api_key)
+    memory_store.append(item.text)
+    return {"message": "Memory added successfully."}
 
-    except Exception as e:
-        print("Error in /ask:", e)
-        return AskResponse(
-            response="Sorry — something went wrong while processing your request."
-        )
+
+@app.get("/tasks")
+def get_tasks(x_api_key: str = Header(None)):
+    validate_api_key(x_api_key)
+    return {"tasks": task_store}
+
+
+@app.post("/tasks")
+def create_task(task: Task, x_api_key: str = Header(None)):
+    validate_api_key(x_api_key)
+    global task_id_counter
+    task.id = task_id_counter
+    task_id_counter += 1
+    task_store.append(task.dict())
+    return {"message": "Task created", "task": task}
+
+
+@app.patch("/tasks/{task_id}")
+def update_task(
+    task_id: int = Path(...),
+    updated_task: Task = Body(...),
+    x_api_key: str = Header(None)
+):
+    validate_api_key(x_api_key)
+    for task in task_store:
+        if task["id"] == task_id:
+            task.update(updated_task.dict(exclude_unset=True))
+            return {"message": "Task updated", "task": task}
+    return {"error": "Task not found"}
+
+
+@app.delete("/tasks/{task_id}")
+def delete_task(task_id: int = Path(...), x_api_key: str = Header(None)):
+    validate_api_key(x_api_key)
+    global task_store
+    task_store = [t for t in task_store if t["id"] != task_id]
+    return {"message": f"Task {task_id} deleted."}
