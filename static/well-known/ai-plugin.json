@@ -1,21 +1,22 @@
 {
   "schema_version": "v1",
-  "name_for_model": "life_os_plugin",
   "name_for_human": "LifeOS Co-Pilot",
-  "description_for_model": "A plugin that uses GPT-4o to manage memory, tasks, reminders, and personal assistant queries.",
-  "description_for_human": "Manage life and tasks using natural language. Backed by GPT-4o.",
+  "name_for_model": "lifeos_copilot",
+  "description_for_human": "Your private LifeOS assistant for productivity, memory, and personal support.",
+  "description_for_model": "LifeOS Co-Pilot API allows the user to ask questions, receive structured answers, and interact with their LifeOS assistant backend.",
   "auth": {
-    "type": "api_key",
-    "authorization_type": "header",
-    "verification_tokens": {},
-    "api_key_header_name": "x-api-key"
+    "type": "service_http",
+    "authorization_type": "api_key",
+    "verification_tokens": {
+      "openai": ""
+    }
   },
   "api": {
     "type": "openapi",
     "url": "https://life-os-private-practical-co-pilot.onrender.com/.well-known/openapi.json",
-    "is_user_authenticated": true
+    "is_user_authenticated": false
   },
-  "logo_url": "https://i.imgur.com/JQpYtdG.png",
-  "contact_email": "austinolsenpersonal@gmail.com",
-  "legal_info_url": "https://life-os-private-practical-co-pilot.onrender.com/.well-known/legal.html"
+  "logo_url": "https://life-os-private-practical-co-pilot.onrender.com/static/logo.png",
+  "contact_email": "support@lifeos.ai",
+  "legal_info_url": "https://life-os-private-practical-co-pilot.onrender.com/legal"
 }
