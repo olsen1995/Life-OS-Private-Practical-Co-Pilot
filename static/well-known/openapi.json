@@ -3,12 +3,12 @@
   "info": {
     "title": "LifeOS Co-Pilot API",
     "version": "1.0.0",
-    "description": "API for managing memory, tasks, reminders, and general queries for LifeOS Co-Pilot."
+    "description": "OpenAPI schema for LifeOS plugin."
   },
   "servers": [
     {
       "url": "https://life-os-private-practical-co-pilot.onrender.com",
-      "description": "Production Server"
+      "description": "Render deployment"
     }
   ],
   "paths": {
@@ -63,8 +63,8 @@
     "securitySchemes": {
       "ApiKeyAuth": {
         "type": "apiKey",
-        "in": "header",
-        "name": "x-api-key"
+        "name": "x-api-key",
+        "in": "header"
       }
     }
   }
