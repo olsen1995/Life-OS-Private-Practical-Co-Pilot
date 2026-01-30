@@ -1,52 +1,53 @@
-from fastapi import FastAPI, Request, Header, HTTPException
+import os
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
-import os
 
-# Load environment variables from .env (for local testing)
+# Load environment variables from .env (for local dev)
 load_dotenv()
 
-# Read API_KEY from environment
 API_KEY = os.getenv("API_KEY")
 
 if not API_KEY:
-    raise RuntimeError("API_KEY is not set. Define it in your .env file or hosting environment.")
+    raise RuntimeError("API_KEY is not set. Define it in your .env or Render environment.")
 
 app = FastAPI()
 
-# ✅ CORS middleware to allow ChatGPT plugin access
+# ✅ Required CORS headers for ChatGPT plugin
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # You can restrict this later
+    allow_origins=["*"],  # In production, lock this down to https://chat.openai.com
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ✅ Serve static files including plugin manifest and legal.html
+# ✅ Mount static folder for .well-known files
 app.mount("/.well-known", StaticFiles(directory="static/well-known"), name="well-known")
 
-# ✅ Core route: /ask
+# ✅ /ask endpoint used in plugin
 @app.post("/ask")
-async def ask(request: Request, x_api_key: str = Header(None)):
+async def ask(request: Request):
+    # Auth
+    x_api_key = request.headers.get("x-api-key")
     if x_api_key != API_KEY:
-        raise HTTPException(status_code=401, detail="Invalid API Key")
+        raise HTTPException(status_code=401, detail="Invalid or missing API key")
 
-    try:
-        body = await request.json()
-        message = body.get("message", "")
-        user_id = body.get("user_id", "default")
+    # Request body
+    body = await request.json()
+    prompt = body.get("prompt")
 
-        return {
-            "user_id": user_id,
-            "response": f"You said: '{message}'. I'm here to help with your LifeOS tasks!"
-        }
+    if not prompt:
+        raise HTTPException(status_code=400, detail="Missing 'prompt' in request")
 
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    # Simulated response
+    return JSONResponse(content={
+        "response": f"✅ LifeOS heard you say: '{prompt}'. This is your assistant's reply!"
+    })
 
-# ✅ Health check (optional)
+# ✅ Optional healthcheck
 @app.get("/")
 def root():
-    return {"status": "LifeOS Co-Pilot is running ✅"}
+    return {"status": "LifeOS Co-Pilot is running"}
