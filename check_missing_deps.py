@@ -3,6 +3,7 @@ import os
 
 from stdlib_list import stdlib_list
 import pkg_resources
+import logging
 
 
 PROJECT_DIR = "."  # Change if needed
@@ -60,7 +61,7 @@ def get_all_project_imports(root_dir):
                 try:
                     all_imports.update(get_imports_from_file(path))
                 except Exception as e:
-                    print(f"⚠️ Skipped {path}: {e}")
+                    logging.info(f"⚠️ Skipped {path}: {e}")
 
     return all_imports
 
@@ -103,7 +104,7 @@ def map_import_to_package(import_name):
 
 
 def main():
-    print("\n🔍 Scanning project for missing dependencies...\n")
+    logging.info("\n🔍 Scanning project for missing dependencies...\n")
 
     stdlib_modules = set(stdlib_list("3.13"))
     local_modules = get_local_module_names(PROJECT_DIR)
@@ -123,11 +124,11 @@ def main():
                 missing.append(pkg_name)
 
     if missing:
-        print("🚨 Missing packages in requirements.txt:\n")
+        logging.info("🚨 Missing packages in requirements.txt:\n")
         for pkg in sorted(set(missing)):
-            print(f"  - {pkg}")
+            logging.info(f"  - {pkg}")
     else:
-        print("✅ All imports are covered in requirements.txt!\n")
+        logging.info("✅ All imports are covered in requirements.txt!\n")
 
 
 if __name__ == "__main__":

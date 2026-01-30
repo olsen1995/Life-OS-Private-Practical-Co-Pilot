@@ -1,7 +1,8 @@
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from openai import OpenAI
-from storage.local_state import get_user_data, update_user_data
+from lifeos.storage.local_state import get_user_data, update_user_data
+import logging
 
 client = OpenAI()
 
@@ -24,7 +25,7 @@ Memory:
     suggestions = content.strip() if content else "No suggestions returned."
 
     update_user_data(user_id, {"suggestions": [suggestions]})
-    print(f"✅ Suggestions saved for {user_id}")
+    logging.info(f"✅ Suggestions saved for {user_id}")
 
 def start_scheduler():
     scheduler = BackgroundScheduler()

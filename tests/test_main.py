@@ -1,9 +1,10 @@
-
 import pytest
 from fastapi.testclient import TestClient
-from main import app
+from lifeos.main import app
 
 client = TestClient(app)
+
+# ✅ Authorization header expected by your middleware
 HEADERS = {"x-api-key": "secret123"}
 
 def test_ask_endpoint():
@@ -11,12 +12,13 @@ def test_ask_endpoint():
         "message": "What can I make with eggs?",
         "user_id": "user_test"
     }, headers=HEADERS)
+
     assert res.status_code == 200
     assert "summary" in res.json()
 
 def test_memory_flow():
     # Add a memory manually
-    from storage.memory_manager import MemoryManager
+    from lifeos.storage.memory_manager import MemoryManager
     mm = MemoryManager("user_test")
     mm.add_memory("Remember the eggs.")
 

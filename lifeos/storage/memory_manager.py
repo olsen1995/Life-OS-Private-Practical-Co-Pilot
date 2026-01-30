@@ -39,4 +39,4 @@ class MemoryManager:
 
     def _now(self):
         from datetime import datetime
-        return datetime.utcnow().isoformat() + "Z"
+        return datetime.now(datetime.UTC)  # ⏰ Updated to timezone-aware UTC.isoformat() + "Z"

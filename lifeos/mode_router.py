@@ -1,11 +1,11 @@
-from prompt_mode import PromptMode
-from memory_mode import MemoryMode
-from notes_mode import NotesMode
-from multi_mode import MultiMode
-from debug_mode import DebugMode
-from system_mode import SystemMode
-from api_key_mode import ApiKeyMode
-from feedback_mode import FeedbackMode
+from lifeos.prompt_mode import PromptMode
+from lifeos.memory_mode import MemoryMode
+from lifeos.notes_mode import NotesMode
+from lifeos.multi_mode import MultiMode
+from lifeos.debug_mode import DebugMode
+from lifeos.system_mode import SystemMode
+from lifeos.api_key_mode import ApiKeyMode
+from lifeos.feedback_mode import FeedbackMode
 
 class ModeRouter:
     def __init__(self):

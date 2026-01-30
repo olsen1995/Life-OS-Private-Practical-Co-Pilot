@@ -1,7 +1,7 @@
 
 import re
 import dateparser
-from storage.local_state import (
+from lifeos.storage.local_state import (
     get_user_data,
     update_user_data,
     delete_item,

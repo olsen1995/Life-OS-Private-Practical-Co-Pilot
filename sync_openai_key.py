@@ -1,6 +1,7 @@
 import os
 import requests
 from dotenv import load_dotenv
+import logging
 
 load_dotenv()
 
@@ -31,8 +32,8 @@ payload = {
 response = requests.put(url, headers=headers, json=payload)
 
 if response.status_code == 200:
-    print("✅ OPENAI_API_KEY updated successfully on Render.")
-    print("ℹ️ Confirm the key in your Render dashboard → Environment tab.")
+    logging.info("✅ OPENAI_API_KEY updated successfully on Render.")
+    logging.info("ℹ️ Confirm the key in your Render dashboard → Environment tab.")
 else:
-    print("❌ Failed to update. Response:")
-    print(response.status_code, response.text)
+    logging.info("❌ Failed to update. Response:")
+    logging.info(response.status_code, response.text)

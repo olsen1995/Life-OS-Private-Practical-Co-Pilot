@@ -1,6 +1,7 @@
 import sys
 import re
 from collections import defaultdict
+import logging
 
 class ModeRouter:
     def __init__(self):
@@ -67,9 +68,9 @@ class ModeRouter:
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python mode_router.py \"your question here\"")
+        logging.info("Usage: python mode_router.py \"your question here\"")
     else:
         router = ModeRouter()
         input_text = " ".join(sys.argv[1:])
         mode, score = router.route(input_text)
-        print(f"🔍 Routed to Mode: {mode} (Confidence Score: {score})")
+        logging.info(f"🔍 Routed to Mode: {mode} (Confidence Score: {score})")
