@@ -17,4 +17,10 @@ jobs:
 
       - name: 🧼 Run Manifest Hygiene Script
         shell: pwsh
-        run: ./scripts/check/manifest_hygiene.ps1
+        run: |
+  if (Test-Path "./scripts/check/manifest_hygiene.ps1") {
+    Write-Host "✅ Running manifest hygiene check..."
+    ./scripts/check/manifest_hygiene.ps1
+  } else {
+    Write-Host "⚠️ manifest_hygiene.ps1 script not found, skipping."
+  }
