@@ -13,9 +13,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ✅ Mount ModeRouter
+# ✅ Mount ModeRouter via composition
 router = ModeRouter()
-app.include_router(router, prefix="")
+app.include_router(router.router, prefix="")
 
 # 🩺 Health check route
 @app.get("/health")
