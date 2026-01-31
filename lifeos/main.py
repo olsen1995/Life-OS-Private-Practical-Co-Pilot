@@ -3,8 +3,15 @@ from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from lifeos.routes.mode_router import ModeRouter
 from lifeos.storage.memory_manager import MemoryManager
+from fastapi.staticfiles import StaticFiles
+import os
+
 
 app = FastAPI()
+
+# Mount .well-known for plugin manifest and OpenAPI spec
+well_known_path = os.path.join(os.path.dirname(__file__), "../static/well-known")
+app.mount("/.well-known", StaticFiles(directory=well_known_path), name="well-known")
 
 # 🧠 Mount router instance
 router = ModeRouter()
