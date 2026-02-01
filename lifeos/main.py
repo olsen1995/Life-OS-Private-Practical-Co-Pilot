@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from lifeos.routes.canon_router import CanonRouter
 from lifeos.routes.gpt_router import router as gpt_router
+from lifeos.routes.memory_read_router import router as memory_read_router
 import datetime
 import logging
 import sys
@@ -25,8 +26,11 @@ START_TIME = datetime.datetime.utcnow()
 canon_router = CanonRouter()
 app.include_router(canon_router.router, prefix="/canon")
 
-# 🤖 Mount GPT read-only router under /gpt
+# 🤖 Mount GPT router including /reason
 app.include_router(gpt_router, prefix="/gpt")
+
+# 🧾 Mount GPT memory read-only router under /gpt/memory
+app.include_router(memory_read_router, prefix="/gpt/memory")
 
 # 🩺 Health check endpoint (non-blocking)
 @app.get("/health")
