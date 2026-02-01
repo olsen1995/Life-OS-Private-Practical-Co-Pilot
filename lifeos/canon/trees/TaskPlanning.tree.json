@@ -2,5 +2,6 @@
   "name": "TaskPlanning",
   "type": "LifeOSTree",
   "version": "5.0.0",
-  "description": "Decision tree scaffold for TaskPlanning strategy."
+  "description": "Declarative decision tree for TaskPlanning.",
+  "nodes": {}
 }

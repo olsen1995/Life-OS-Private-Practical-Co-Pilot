@@ -2,5 +2,6 @@
   "name": "DeviceOptimization",
   "type": "LifeOSTree",
   "version": "5.0.0",
-  "description": "Decision tree scaffold for DeviceOptimization strategy."
+  "description": "Declarative decision tree for DeviceOptimization.",
+  "nodes": {}
 }

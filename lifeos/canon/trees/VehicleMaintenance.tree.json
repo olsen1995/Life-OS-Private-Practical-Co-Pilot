@@ -2,5 +2,6 @@
   "name": "VehicleMaintenance",
   "type": "LifeOSTree",
   "version": "5.0.0",
-  "description": "Decision tree scaffold for VehicleMaintenance strategy."
+  "description": "Declarative decision tree for VehicleMaintenance.",
+  "nodes": {}
 }

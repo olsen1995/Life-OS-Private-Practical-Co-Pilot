@@ -2,5 +2,6 @@
   "name": "Cooking",
   "type": "LifeOSTree",
   "version": "5.0.0",
-  "description": "Decision tree scaffold for Cooking strategy."
+  "description": "Declarative decision tree for Cooking.",
+  "nodes": {}
 }

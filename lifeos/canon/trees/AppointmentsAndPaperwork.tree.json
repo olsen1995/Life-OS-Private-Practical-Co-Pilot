@@ -2,5 +2,6 @@
   "name": "AppointmentsAndPaperwork",
   "type": "LifeOSTree",
   "version": "5.0.0",
-  "description": "Decision tree scaffold for AppointmentsAndPaperwork strategy."
+  "description": "Declarative decision tree for AppointmentsAndPaperwork.",
+  "nodes": {}
 }
