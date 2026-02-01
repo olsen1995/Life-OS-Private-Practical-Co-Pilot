@@ -74,6 +74,7 @@ async def summarize_canon(request: CanonSummarizeRequest):
             summary = llm_summarize_entity(full_entity)
         else:
             summary = summarize_entity(full_entity)
+        validate_summary(summary, full_entity)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

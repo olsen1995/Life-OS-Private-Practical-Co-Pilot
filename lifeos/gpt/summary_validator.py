@@ -1,25 +1,26 @@
 def validate_summary(summary: str, entity: dict) -> None:
-    name = entity.get("name", "")
-    entity_type = entity.get("type", "")
-
     if not isinstance(summary, str):
-        raise ValueError("Summary must be a string.")
+        raise ValueError("Summary must be a string")
 
+    summary = summary.strip()
     length = len(summary)
-    if length < 20 or length > 300:
-        raise ValueError("Summary must be between 20 and 300 characters.")
 
-    if name not in summary:
-        raise ValueError("Summary must mention the entity name.")
+    if length < 20:
+        raise ValueError("Summary is too short (< 20 characters)")
+    if length > 300:
+        raise ValueError("Summary is too long (> 300 characters)")
 
-    if entity_type not in summary:
-        raise ValueError("Summary must mention the entity type.")
+    name = entity.get("name", "").lower()
+    type_ = entity.get("type", "").lower()
+    text = summary.lower()
 
-    if any(token in summary for token in ["[", "]", "http", "*", "_", "`"]):
-        raise ValueError("Summary must not contain markdown or links.")
+    if name not in text:
+        raise ValueError(f"Summary must mention entity name: {name}")
+    if type_ not in text:
+        raise ValueError(f"Summary must mention entity type: {type_}")
 
-    if "might" in summary or "could" in summary:
-        raise ValueError("Summary must not speculate.")
+    if any(symbol in summary for symbol in ["**", "*", "[", "]", "`", "http", "<", ">"]):
+        raise ValueError("Summary contains disallowed formatting or links")
 
-    if not summary[0].isupper() or not summary.endswith("."):
-        raise ValueError("Summary must be a plain English declarative sentence.")
+    if "external" in text or "future" in text:
+        raise ValueError("Summary contains speculative or external references")
