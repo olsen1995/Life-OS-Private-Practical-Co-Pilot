@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from lifeos.routes.canon_router import CanonRouter
+from lifeos.routes.gpt_router import router as gpt_router
 import datetime
 import logging
 import sys
@@ -24,6 +24,9 @@ START_TIME = datetime.datetime.utcnow()
 # 🧠 Mount Canon read-only router under /canon
 canon_router = CanonRouter()
 app.include_router(canon_router.router, prefix="/canon")
+
+# 🤖 Mount GPT read-only router under /gpt
+app.include_router(gpt_router, prefix="/gpt")
 
 # 🩺 Health check endpoint (non-blocking)
 @app.get("/health")
@@ -57,7 +60,7 @@ async def log_exceptions(request: Request, call_next):
             "path": request.url.path,
             "error": str(exc)
         }))
-        raise  # Maintain original HTTP behavior
+        raise
 
 # 🟢 Structured boot confirmation
 logger.info("startup_complete")
