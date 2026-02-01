@@ -1,55 +1,68 @@
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import List, Optional, Dict, Any
-from lifeos.routes.canon_router import CanonRouter
-from lifeos.gpt.gpt_reasoner import gpt_reason
+from typing import Optional, Dict, List
 import logging
+import json
+
+from lifeos.routes.canon_router import CanonRouter
+from lifeos.gpt.gpt_summarizer import summarize_entity
+
+logger = logging.getLogger("lifeos")
 
 router = APIRouter()
 canon_router = CanonRouter()
-logger = logging.getLogger("lifeos")
 
-@router.get("/ask")
-def gpt_ready():
-    return {
-        "status": "ready",
-        "model": "LifeOS Co-Pilot",
-        "version": "0.1.0"
-    }
+class CanonQueryRequest(BaseModel):
+    type: str
 
-@router.get("/canon/query")
-def gpt_query_canon(type: str):
-    try:
-        return canon_router.get_entries_by_type(type=type)
-    except HTTPException as e:
-        raise e
+class CanonSearchRequest(BaseModel):
+    filters: Optional[Dict[str, str]] = None
 
-class ReasonRequest(BaseModel):
-    intent: str
-    context: Optional[str] = None
-    canon_types: List[str]
+class CanonSummarizeRequest(BaseModel):
+    type: str
+    name: str
 
-@router.post("/reason")
-def gpt_reason_endpoint(payload: ReasonRequest):
-    canon_data: Dict[str, List[Dict[str, Any]]] = {}
+@router.post("/canon/query")
+async def query_canon(request: CanonQueryRequest):
+    entries = canon_router.get_entries_by_type(request.type)
+    logger.info(json.dumps({
+        "event": "canon_query",
+        "type": request.type,
+        "results": len(entries)
+    }))
+    return {"status": "ok", "results": entries}
 
-    for ctype in payload.canon_types:
-        try:
-            canon_data[ctype] = canon_router.get_entries_by_type(type=ctype)
-        except HTTPException:
-            canon_data[ctype] = []
+@router.post("/canon/search")
+async def search_canon(request: CanonSearchRequest):
+    filters = request.filters or {}
+    allowed_keys = {"type", "name", "version"}
+    if any(k not in allowed_keys for k in filters):
+        raise HTTPException(status_code=400, detail="Invalid filter keys")
 
-    result = gpt_reason(
-        intent=payload.intent,
-        context=payload.context or "",
-        canon_data=canon_data
-    )
+    entries = canon_router.get_all_entries()
+    results = [entry for entry in entries if all(entry.get(k) == v for k, v in filters.items())]
 
-    logger.info({
-        "event": "gpt_reason_called",
-        "intent": payload.intent,
-        "types": payload.canon_types,
-        "response_len": len(result["reasoning"])
-    })
+    logger.info(json.dumps({
+        "event": "canon_search",
+        "filter_keys": list(filters.keys()),
+        "results": len(results)
+    }))
+    return {"status": "ok", "results": results}
 
-    return result
+@router.post("/canon/summarize")
+async def summarize_canon(request: CanonSummarizeRequest):
+    entries = canon_router.get_entries_by_type(request.type)
+    entry = next((e for e in entries if e["name"] == request.name), None)
+    if not entry:
+        raise HTTPException(status_code=404, detail="Entity not found")
+
+    entity = canon_router.get_file_by_path(entry["path"])
+    summary = summarize_entity(entity)
+
+    logger.info(json.dumps({
+        "event": "canon_summarize",
+        "type": request.type,
+        "name": request.name
+    }))
+
+    return {"status": "ok", "summary": summary}
