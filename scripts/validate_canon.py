@@ -77,19 +77,19 @@ def main():
     # Output summary
     print()
     if errors:
-        print("❌ Canon integrity check failed:")
+        print("X Canon integrity check failed:")
         for e in errors:
             print("-", e)
     else:
-        print("✅ No structural errors found in Canon manifest.")
+        print("OK No structural errors found in Canon manifest.")
 
     if warnings:
-        print("\n⚠️ Warnings:")
+        print("\nWARNINGS:")
         for w in warnings:
             print("-", w)
 
     if not errors:
-        print(f"\n✔ Canon integrity check passed ({len(manifest['entries'])} entries, {len(warnings)} warnings)")
+        print(f"\nPASS Canon integrity check passed ({len(manifest['entries'])} entries, {len(warnings)} warnings)")
         sys.exit(0)
     else:
         sys.exit(1)
