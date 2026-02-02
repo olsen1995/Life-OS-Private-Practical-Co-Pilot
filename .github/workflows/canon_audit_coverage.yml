@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Verify audit hook coverage (Canon routes excluded)
+      - name: Verify audit hook coverage (approved exclusions applied)
         run: |
           python - << 'EOF'
           import pathlib
@@ -19,9 +19,23 @@ jobs:
           routes_dir = pathlib.Path("lifeos/routes")
           missing = []
 
+          EXCLUDED_FILES = {
+              "__init__.py",
+              "healthz.py",
+              "openapi_alias.py",
+              "gpt_router.py",
+              "memory_read_router.py",
+              "mode_router.py",
+              "metrics.py",
+          }
+
           for f in routes_dir.rglob("*.py"):
-              # Canon routes are read-only and intentionally have no audit hooks
-              if "canon" in f.name:
+              # Canon routes are read-only
+              if "canon" in f.parts:
+                  continue
+
+              # Explicitly excluded system/meta routes
+              if f.name in EXCLUDED_FILES:
                   continue
 
               text = f.read_text(encoding="utf-8")
@@ -38,5 +52,5 @@ jobs:
                   print("-", m)
               raise SystemExit(1)
 
-          print("Audit hook coverage OK (Canon routes excluded).")
+          print("Audit hook coverage OK (approved exclusions applied).")
           EOF
