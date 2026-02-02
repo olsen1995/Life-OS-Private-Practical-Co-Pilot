@@ -18,6 +18,7 @@ def build_snapshot():
             "snapshot_hash": snapshot_hash,
             "canon_version": CanonRouter.canon_version(),
             "normalization_version": NORMALIZATION_VERSION,
+            "policy_version": "1.0.0",
         },
     }
 
