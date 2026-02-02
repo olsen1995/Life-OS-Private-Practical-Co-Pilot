@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: lifeos
+    rootDir: lifeos
     env: python
     plan: free
     rootDir: lifeos
