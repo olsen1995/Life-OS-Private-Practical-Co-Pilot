@@ -11,7 +11,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Compute Snapshot Hash
+      - name: Build Snapshot (aligned with lifeos rootDir)
+        env:
+          PYTHONPATH: lifeos
         run: |
           python - << 'EOF'
           from lifeos.canon.snapshot import build_snapshot
