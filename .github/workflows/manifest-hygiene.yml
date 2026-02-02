@@ -4,23 +4,19 @@ on:
   push:
     branches: [ main ]
   pull_request:
-    branches: [ main ]
 
 jobs:
-  hygiene:
-    name: Run Manifest Hygiene
-    runs-on: windows-latest
-
+  manifest-hygiene:
+    runs-on: ubuntu-latest
     steps:
-      - name: 📥 Checkout repo
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: 🧼 Run Manifest Hygiene Script
+      - name: Verify release manifest exists
         shell: pwsh
         run: |
-  if (Test-Path "./scripts/check/manifest_hygiene.ps1") {
-    Write-Host "✅ Running manifest hygiene check..."
-    ./scripts/check/manifest_hygiene.ps1
-  } else {
-    Write-Host "⚠️ manifest_hygiene.ps1 script not found, skipping."
-  }
+          if (Test-Path "governance/RELEASE_MANIFEST.json") {
+            Write-Host "Release manifest present."
+          } else {
+            Write-Error "Missing RELEASE_MANIFEST.json"
+            exit 1
+          }

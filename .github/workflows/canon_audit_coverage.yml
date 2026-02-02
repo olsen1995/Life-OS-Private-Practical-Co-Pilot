@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Verify audit hook coverage (excluding Canon read-only routes)
+      - name: Verify audit hook coverage (Canon routes excluded)
         run: |
           python - << 'EOF'
           import pathlib
@@ -20,16 +20,20 @@ jobs:
           missing = []
 
           for f in routes_dir.rglob("*.py"):
-              # Canon read-only routes are explicitly excluded
+              # Canon routes are read-only and intentionally have no audit hooks
               if "canon" in f.name:
                   continue
 
               text = f.read_text(encoding="utf-8")
-              if "audit_read(" not in text and "audit_read_with_provenance(" not in text:
+
+              if (
+                  "audit_read(" not in text
+                  and "audit_read_with_provenance(" not in text
+              ):
                   missing.append(str(f))
 
           if missing:
-              print("Missing audit hook in:")
+              print("Missing audit hook in the following routes:")
               for m in missing:
                   print("-", m)
               raise SystemExit(1)

@@ -11,19 +11,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build Snapshot (aligned with lifeos rootDir)
+      - name: Build Canon Snapshot (aligned with lifeos rootDir)
         env:
           PYTHONPATH: lifeos
         run: |
           python - << 'EOF'
           from lifeos.canon.snapshot import build_snapshot
-          snap = build_snapshot()
+
+          snapshot = build_snapshot()
+          integrity = snapshot["integrity"]
+
           with open("current_snapshot_hash.txt", "w") as f:
-              f.write(snap["integrity"]["snapshot_hash"])
+              f.write(integrity["snapshot_hash"])
+
           with open("current_versions.txt", "w") as f:
               f.write(
-                  snap["integrity"]["canon_version"] + "\n" +
-                  snap["integrity"]["normalization_version"]
+                  integrity["canon_version"] + "\n" +
+                  integrity["normalization_version"]
               )
           EOF
 
@@ -37,7 +41,7 @@ jobs:
             fi
           fi
 
-      - name: Upload Drift Artifact
+      - name: Upload Drift Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: canon-drift
