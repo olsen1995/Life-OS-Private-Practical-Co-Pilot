@@ -1,12 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routes.metrics import get_metrics
 from canon.router import CanonRouter
+from meta.version import get_version
 
-app = FastAPI()
+app = FastAPI(
+    title="LifeOS API",
+    version="1.0.0",
+    description="Stable read-only API surface for LifeOS Canon",
+)
 
-# CORS (per prior config — unchanged)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -15,11 +18,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Health check (required for Render)
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
 
-# Canon router (read-only)
+
+@app.get("/meta/version")
+def meta_version():
+    return get_version()
+
+
 canon_router = CanonRouter()
 app.include_router(canon_router.router)
