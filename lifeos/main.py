@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from fastapi import FastAPI, Form
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
@@ -50,14 +50,3 @@ router = ModeRouter()
 app.include_router(router.router)
 app.include_router(memory_read_router)
 app.include_router(healthz_router)
-
-# ─────────────────────────────────────────────────────────────
-# Simple /ask Endpoint (unchanged)
-# ─────────────────────────────────────────────────────────────
-
-@app.post("/ask")
-def ask(message: str = Form(...), user_id: str = Form(...)):
-    return {
-        "summary": f"You said: {message}",
-        "user_id": user_id,
-    }
