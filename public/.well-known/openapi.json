@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "LifeOS Co-Pilot API",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "Minimal OpenAPI schema for GPT Actions"
   },
   "servers": [
@@ -22,10 +22,17 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "message": { "type": "string" },
-                  "user_id": { "type": "string" }
+                  "message": {
+                    "type": "string"
+                  },
+                  "user_id": {
+                    "type": "string"
+                  }
                 },
-                "required": ["message", "user_id"]
+                "required": [
+                  "message",
+                  "user_id"
+                ]
               }
             }
           }
@@ -38,14 +45,22 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "summary": { "type": "string" },
-                    "user_id": { "type": "string" },
+                    "summary": {
+                      "type": "string"
+                    },
+                    "user_id": {
+                      "type": "string"
+                    },
                     "memory": {
                       "type": "object",
                       "additionalProperties": true
                     }
                   },
-                  "required": ["summary", "user_id", "memory"]
+                  "required": [
+                    "summary",
+                    "user_id",
+                    "memory"
+                  ]
                 }
               }
             }
@@ -62,7 +77,9 @@
             "name": "user_id",
             "in": "query",
             "required": true,
-            "schema": { "type": "string" }
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -73,6 +90,7 @@
                 "schema": {
                   "type": "object",
                   "description": "Unwrapped memory dictionary",
+                  "properties": {},
                   "additionalProperties": true
                 }
               }
