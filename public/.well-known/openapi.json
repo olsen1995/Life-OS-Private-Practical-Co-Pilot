@@ -5,6 +5,11 @@
     "version": "1.0.0",
     "description": "Minimal OpenAPI schema for GPT Actions"
   },
+  "servers": [
+    {
+      "url": "https://life-os-private-practical-co-pilot.onrender.com"
+    }
+  ],
   "paths": {
     "/ask": {
       "post": {
