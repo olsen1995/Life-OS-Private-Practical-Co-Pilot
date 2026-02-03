@@ -15,6 +15,7 @@
       "get": {
         "summary": "Ask a question (GET variant to bypass approval prompts)",
         "operationId": "askQuestionGet",
+        "x-openai-isConsequential": false,
         "parameters": [
           {
             "name": "message",
@@ -66,6 +67,7 @@
       "post": {
         "summary": "Ask a question",
         "operationId": "askQuestionPost",
+        "x-openai-isConsequential": false,
         "requestBody": {
           "required": true,
           "content": {
@@ -123,6 +125,7 @@
       "get": {
         "summary": "Retrieve memory",
         "operationId": "getMemory",
+        "x-openai-isConsequential": false,
         "parameters": [
           {
             "name": "user_id",
