@@ -3,4 +3,4 @@ uvicorn
 pydantic
 orjson
 python-dotenv
-python-multipart
+python-multipart>=0.0.9

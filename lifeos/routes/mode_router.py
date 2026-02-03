@@ -14,7 +14,7 @@ class ModeRouter:
     def __init__(self):
         self.router = APIRouter()
         self.router.add_api_route("/ask", self.ask_handler, methods=["POST"])
-        self.router.add_api_route("/ask", self.ask_handler_get, methods=["GET"])  # ✅ NEW ROUTE
+        self.router.add_api_route("/ask", self.ask_handler_get, methods=["GET"])
         self.router.add_api_route("/memory", self.memory_write_handler, methods=["POST"])
         self.router.add_api_route("/memory", self.memory_read_handler, methods=["GET"])
         self.router.add_api_route("/memory", self.memory_delete_handler, methods=["DELETE"])
@@ -28,7 +28,7 @@ class ModeRouter:
             "memory": memory
         }
 
-    def ask_handler_get(self, message: str = Query(...), user_id: str = Query(...)):  # ✅ NEW HANDLER
+    def ask_handler_get(self, message: str = Query(...), user_id: str = Query(...)):
         mm = MemoryManager(user_id)
         memory = mm.get_all()
         return {
