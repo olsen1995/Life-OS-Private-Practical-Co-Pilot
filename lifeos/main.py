@@ -10,10 +10,9 @@ app = FastAPI(
     version="2.0.1",
     servers=[
         {
-            "url": "https://life-os-private-practical-co-pilot.onrender.com",
-            "description": "Production (Render)",
+            "url": "https://life-os-private-practical-co-pilot.onrender.com"
         }
-    ],
+    ]
 )
 
 # ─────────────────────────────────────────────────────────────
@@ -56,3 +55,4 @@ def ask(message: str = Form(...), user_id: str = Form(...)):
         "summary": f"You said: {message}",
         "user_id": user_id,
     }
+
