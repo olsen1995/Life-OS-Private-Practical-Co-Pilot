@@ -2,19 +2,20 @@
   "openapi": "3.1.0",
   "info": {
     "title": "LifeOS Co-Pilot API",
-    "version": "1.0.3",
-    "description": "Minimal OpenAPI schema for GPT Actions"
+    "version": "1.0.4",
+    "description": "Static OpenAPI schema for GPT Actions (ModeRouter runtime truth)."
   },
   "servers": [
     {
-      "url": "https://life-os-private-practical-co-pilot.onrender.com"
+      "url": "https://life-os-private-practical-co-pilot.onrender.com",
+      "description": "Production server"
     }
   ],
   "paths": {
     "/ask": {
       "get": {
-        "summary": "Ask a question (GET variant to bypass approval prompts)",
-        "operationId": "askQuestionGet",
+        "summary": "Ask a question (query params)",
+        "operationId": "askGet",
         "x-openai-isConsequential": false,
         "parameters": [
           {
@@ -36,7 +37,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Response",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
@@ -47,17 +48,9 @@
                     },
                     "user_id": {
                       "type": "string"
-                    },
-                    "memory": {
-                      "type": "object",
-                      "additionalProperties": true
                     }
                   },
-                  "required": [
-                    "summary",
-                    "user_id",
-                    "memory"
-                  ]
+                  "additionalProperties": true
                 }
               }
             }
@@ -65,8 +58,8 @@
         }
       },
       "post": {
-        "summary": "Ask a question",
-        "operationId": "askQuestionPost",
+        "summary": "Ask a question (form POST)",
+        "operationId": "askPost",
         "x-openai-isConsequential": false,
         "requestBody": {
           "required": true,
@@ -85,14 +78,15 @@
                 "required": [
                   "message",
                   "user_id"
-                ]
+                ],
+                "additionalProperties": false
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Response",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
@@ -103,17 +97,9 @@
                     },
                     "user_id": {
                       "type": "string"
-                    },
-                    "memory": {
-                      "type": "object",
-                      "additionalProperties": true
                     }
                   },
-                  "required": [
-                    "summary",
-                    "user_id",
-                    "memory"
-                  ]
+                  "additionalProperties": true
                 }
               }
             }
@@ -123,8 +109,8 @@
     },
     "/memory": {
       "get": {
-        "summary": "Retrieve memory",
-        "operationId": "getMemory",
+        "summary": "Retrieve memory for a user",
+        "operationId": "memoryGet",
         "x-openai-isConsequential": false,
         "parameters": [
           {
@@ -138,13 +124,98 @@
         ],
         "responses": {
           "200": {
-            "description": "Memory content",
+            "description": "Memory object",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "description": "Unwrapped memory dictionary",
                   "properties": {},
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Write/replace memory for a user (JSON body)",
+        "operationId": "memoryPost",
+        "x-openai-isConsequential": false,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "user_id": {
+                    "type": "string"
+                  },
+                  "memory": {
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": [
+                  "user_id",
+                  "memory"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Write result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "written": {
+                      "type": "number"
+                    }
+                  },
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete memory for a user",
+        "operationId": "memoryDelete",
+        "x-openai-isConsequential": false,
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delete result (idempotent)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "deleted": {
+                      "type": "boolean"
+                    }
+                  },
                   "additionalProperties": true
                 }
               }
