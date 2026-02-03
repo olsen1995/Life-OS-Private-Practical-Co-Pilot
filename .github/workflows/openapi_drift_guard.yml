@@ -45,9 +45,7 @@ jobs:
               "https://life-os-private-practical-co-pilot.onrender.com" in s.get("url", "")
               for s in servers
           ):
-              raise SystemExit(
-                  "❌ ERROR: expected Render server URL not found in servers block"
-              )
+              raise SystemExit("❌ ERROR: expected Render server URL not found in servers block")
 
           paths = data.get("paths", {})
 
