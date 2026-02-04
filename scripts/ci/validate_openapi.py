@@ -1,97 +1,102 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
-from typing import Any, Dict, List, NoReturn
+from typing import Any, Dict, List, cast
 
 
-OPENAPI_FILE = Path("public/.well-known/openapi.json")
-EXPECTED_OPENAPI_VERSION = "3.1.0"
-EXPECTED_SERVER_SUBSTRING = "https://life-os-private-practical-co-pilot.onrender.com"
-
-REQUIRED: Dict[str, List[str]] = {
-    "/ask": ["get", "post"],
-    "/memory": ["get", "post", "delete"],
-}
+OPENAPI_PATH = Path("public/.well-known/openapi.json")
+EXPECTED_SERVER = "https://life-os-private-practical-co-pilot.onrender.com"
 
 
-def fail(msg: str, code: int = 1) -> NoReturn:
-    # NoReturn tells Pylance that execution stops here (so variables are "definitely assigned")
-    print(msg)
-    raise SystemExit(code)
+def fail(msg: str) -> None:
+    print(f"❌ {msg}")
+    sys.exit(1)
 
 
 def load_json(path: Path) -> Dict[str, Any]:
-    if not path.exists():
-        fail(f"❌ ERROR: {path.as_posix()} not found")
+    """
+    Load and parse JSON from a file path.
+    Pylance-safe: data is always bound; output is guaranteed to be a dict.
+    """
+    data: Any = {}
 
     try:
-        with path.open("r", encoding="utf-8") as f:
-            data = json.load(f)
+        raw = path.read_text(encoding="utf-8")
+        data = json.loads(raw)
+    except FileNotFoundError:
+        fail(f"OpenAPI file not found: {path}")
     except json.JSONDecodeError as e:
-        fail(f"❌ ERROR: invalid JSON in {path.as_posix()} :: {e}")
+        fail(f"Invalid JSON in OpenAPI file: {e}")
 
     if not isinstance(data, dict):
-        fail(f"❌ ERROR: root of {path.as_posix()} must be a JSON object")
+        fail(f"OpenAPI root must be a JSON object: {path}")
 
-    return data
+    return cast(Dict[str, Any], data)
 
 
 def main() -> None:
-    data = load_json(OPENAPI_FILE)
+    if not OPENAPI_PATH.exists():
+        fail(f"Missing required file: {OPENAPI_PATH}")
 
-    # 1) Basic structure
-    if data.get("openapi") != EXPECTED_OPENAPI_VERSION:
-        fail(f"❌ ERROR: openapi version must be {EXPECTED_OPENAPI_VERSION}")
+    data = load_json(OPENAPI_PATH)
 
-    servers = data.get("servers", [])
-    if not isinstance(servers, list):
-        fail("❌ ERROR: servers must be a list")
+    # Validate OpenAPI version
+    if data.get("openapi") != "3.1.0":
+        fail("OpenAPI version must be 3.1.0")
+
+    # Validate servers
+    servers_any = data.get("servers", [])
+    if not isinstance(servers_any, list):
+        fail("servers must be a list")
+
+    servers: List[Any] = servers_any
 
     if not any(
-        EXPECTED_SERVER_SUBSTRING in (s.get("url", "") if isinstance(s, dict) else "")
+        (s.get("url") == EXPECTED_SERVER) if isinstance(s, dict) else False
         for s in servers
     ):
-        fail("❌ ERROR: expected Render server URL not found in servers block")
+        fail("Expected Render server URL not found in servers list")
 
-    paths = data.get("paths", {})
-    if not isinstance(paths, dict):
-        fail("❌ ERROR: paths must be an object")
+    # Validate required paths/methods
+    paths_any = data.get("paths", {})
+    if not isinstance(paths_any, dict):
+        fail("paths must be an object")
 
-    # 2) Check required paths and methods + consequential flag
-    missing: List[str] = []
+    paths: Dict[str, Any] = paths_any
 
-    for path, methods in REQUIRED.items():
-        if path not in paths:
-            missing.append(f"Missing path: {path}")
-            continue
+    required = {
+        "/ask": ["get", "post"],
+        "/memory": ["get", "post", "delete"],
+    }
 
-        node = paths[path]
-        if not isinstance(node, dict):
-            missing.append(f"Path node for {path} must be an object")
-            continue
+    for route, methods in required.items():
+        if route not in paths:
+            fail(f"Missing required path: {route}")
+
+        # Use direct indexing (Pylance-safe after membership check)
+        route_obj = paths[route]
+
+        if not isinstance(route_obj, dict):
+            fail(f"Path entry must be an object: {route}")
 
         for method in methods:
-            if method not in node:
-                missing.append(f"Missing method: {method.upper()} on {path}")
-                continue
+            if method not in route_obj:
+                fail(f"Missing required method: {method.upper()} {route}")
 
-            op = node[method]
+            # Direct indexing again (guaranteed present)
+            op = route_obj[method]
+
             if not isinstance(op, dict):
-                missing.append(f"{method.upper()} on {path} must be an object")
-                continue
+                fail(f"Operation must be an object: {method.upper()} {route}")
 
             if op.get("x-openai-isConsequential") is not False:
-                missing.append(
-                    f"{method.upper()} on {path} missing x-openai-isConsequential: false"
+                fail(
+                    f"Missing or incorrect x-openai-isConsequential flag on {method.upper()} {route}"
                 )
 
-    if missing:
-        for m in missing:
-            print("❌", m)
-        fail("❌ ERROR: OpenAPI schema failed validation.")
-
-    print("✅ OpenAPI schema is valid.")
+    print("✅ OpenAPI schema validation passed.")
 
 
 if __name__ == "__main__":
