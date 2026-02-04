@@ -1,89 +1,90 @@
-"""
-OpenAPI Drift Guard Validator
-
-Validates that the static OpenAPI file exists and contains the required
-paths/methods expected by the LifeOS Co-Pilot API.
-
-This script is intended to run in CI, but can be run locally too:
-  python scripts/ci/validate_openapi.py
-"""
-
 from __future__ import annotations
 
 import json
-import sys
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List, NoReturn
 
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-OPENAPI_FILE = REPO_ROOT / "public" / ".well-known" / "openapi.json"
-
+OPENAPI_FILE = Path("public/.well-known/openapi.json")
 EXPECTED_OPENAPI_VERSION = "3.1.0"
-EXPECTED_SERVER_SUBSTR = "https://life-os-private-practical-co-pilot.onrender.com"
+EXPECTED_SERVER_SUBSTRING = "https://life-os-private-practical-co-pilot.onrender.com"
 
-REQUIRED: dict[str, list[str]] = {
+REQUIRED: Dict[str, List[str]] = {
     "/ask": ["get", "post"],
     "/memory": ["get", "post", "delete"],
 }
 
 
-def fail(msg: str, code: int = 1) -> None:
+def fail(msg: str, code: int = 1) -> NoReturn:
+    # NoReturn tells Pylance that execution stops here (so variables are "definitely assigned")
     print(msg)
     raise SystemExit(code)
 
 
-def main() -> None:
-    if not OPENAPI_FILE.exists():
-        fail(f"❌ ERROR: OpenAPI file not found: {OPENAPI_FILE}")
-
-    # ✅ Initialize data so static analyzers (Pylance) know it's always defined.
-    data: Dict[str, Any] = {}
+def load_json(path: Path) -> Dict[str, Any]:
+    if not path.exists():
+        fail(f"❌ ERROR: {path.as_posix()} not found")
 
     try:
-        data = json.loads(OPENAPI_FILE.read_text(encoding="utf-8"))
-    except Exception as e:
-        fail(f"❌ ERROR: Failed to parse JSON in {OPENAPI_FILE}: {e}")
+        with path.open("r", encoding="utf-8") as f:
+            data = json.load(f)
+    except json.JSONDecodeError as e:
+        fail(f"❌ ERROR: invalid JSON in {path.as_posix()} :: {e}")
 
-    # 1) Basic structure checks
+    if not isinstance(data, dict):
+        fail(f"❌ ERROR: root of {path.as_posix()} must be a JSON object")
+
+    return data
+
+
+def main() -> None:
+    data = load_json(OPENAPI_FILE)
+
+    # 1) Basic structure
     if data.get("openapi") != EXPECTED_OPENAPI_VERSION:
         fail(f"❌ ERROR: openapi version must be {EXPECTED_OPENAPI_VERSION}")
 
     servers = data.get("servers", [])
     if not isinstance(servers, list):
-        fail("❌ ERROR: 'servers' must be a list")
+        fail("❌ ERROR: servers must be a list")
 
-    if not any(EXPECTED_SERVER_SUBSTR in str(s.get("url", "")) for s in servers if isinstance(s, dict)):
+    if not any(
+        EXPECTED_SERVER_SUBSTRING in (s.get("url", "") if isinstance(s, dict) else "")
+        for s in servers
+    ):
         fail("❌ ERROR: expected Render server URL not found in servers block")
 
     paths = data.get("paths", {})
     if not isinstance(paths, dict):
-        fail("❌ ERROR: 'paths' must be an object")
+        fail("❌ ERROR: paths must be an object")
 
-    # 2) Required paths + methods + x-openai-isConsequential checks
-    missing: list[str] = []
+    # 2) Check required paths and methods + consequential flag
+    missing: List[str] = []
 
     for path, methods in REQUIRED.items():
         if path not in paths:
             missing.append(f"Missing path: {path}")
             continue
 
-        if not isinstance(paths[path], dict):
-            missing.append(f"Invalid path object (expected dict): {path}")
+        node = paths[path]
+        if not isinstance(node, dict):
+            missing.append(f"Path node for {path} must be an object")
             continue
 
         for method in methods:
-            if method not in paths[path]:
+            if method not in node:
                 missing.append(f"Missing method: {method.upper()} on {path}")
                 continue
 
-            op = paths[path][method]
+            op = node[method]
             if not isinstance(op, dict):
-                missing.append(f"Invalid operation object: {method.upper()} on {path}")
+                missing.append(f"{method.upper()} on {path} must be an object")
                 continue
 
             if op.get("x-openai-isConsequential") is not False:
-                missing.append(f"{method.upper()} on {path} missing x-openai-isConsequential: false")
+                missing.append(
+                    f"{method.upper()} on {path} missing x-openai-isConsequential: false"
+                )
 
     if missing:
         for m in missing:
@@ -94,10 +95,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except SystemExit:
-        raise
-    except Exception as e:
-        print(f"❌ ERROR: Unexpected failure: {e}")
-        sys.exit(1)
+    main()
