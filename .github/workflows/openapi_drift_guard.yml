@@ -18,4 +18,6 @@ jobs:
           python-version: "3.x"
 
       - name: 🧪 Validate OpenAPI Schema
-        run: python3 scripts/ci/validate_openapi.py
+        run: |
+          set -euo pipefail
+          python scripts/ci/validate_openapi.py
