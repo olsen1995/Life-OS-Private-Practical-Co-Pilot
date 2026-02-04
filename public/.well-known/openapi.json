@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "LifeOS Co-Pilot API",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "description": "Static OpenAPI schema for GPT Actions (ModeRouter runtime truth)."
   },
   "servers": [
@@ -48,43 +48,45 @@
                     },
                     "user_id": {
                       "type": "string"
+                    },
+                    "memory": {
+                      "type": "object",
+                      "additionalProperties": true
                     }
                   },
                   "additionalProperties": true
-                },
-                "example": {
-                  "summary": "You said: hello",
-                  "user_id": "demo"
                 }
               }
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Bad request",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": true
                 }
               }
             }
           },
           "500": {
-            "description": "Server Error",
+            "description": "Server error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": true
                 }
               }
             }
@@ -114,10 +116,6 @@
                   "user_id"
                 ],
                 "additionalProperties": false
-              },
-              "example": {
-                "message": "hello",
-                "user_id": "demo"
               }
             }
           }
@@ -135,43 +133,45 @@
                     },
                     "user_id": {
                       "type": "string"
+                    },
+                    "memory": {
+                      "type": "object",
+                      "additionalProperties": true
                     }
                   },
                   "additionalProperties": true
-                },
-                "example": {
-                  "summary": "You said: hello",
-                  "user_id": "demo"
                 }
               }
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Bad request",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": true
                 }
               }
             }
           },
           "500": {
-            "description": "Server Error",
+            "description": "Server error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": true
                 }
               }
             }
@@ -203,39 +203,38 @@
                   "type": "object",
                   "properties": {},
                   "additionalProperties": true
-                },
-                "example": {
-                  "some_key": "some_value"
                 }
               }
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Bad request",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": true
                 }
               }
             }
           },
           "500": {
-            "description": "Server Error",
+            "description": "Server error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": true
                 }
               }
             }
@@ -266,12 +265,6 @@
                   "memory"
                 ],
                 "additionalProperties": false
-              },
-              "example": {
-                "user_id": "demo",
-                "memory": {
-                  "some_key": "some_value"
-                }
               }
             }
           }
@@ -288,44 +281,42 @@
                       "type": "boolean"
                     },
                     "written": {
-                      "type": "integer"
+                      "type": "number"
                     }
                   },
                   "additionalProperties": true
-                },
-                "example": {
-                  "ok": true,
-                  "written": 1
                 }
               }
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Bad request",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": true
                 }
               }
             }
           },
           "500": {
-            "description": "Server Error",
+            "description": "Server error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": true
                 }
               }
             }
@@ -362,77 +353,43 @@
                     }
                   },
                   "additionalProperties": true
-                },
-                "examples": {
-                  "deletedTrue": {
-                    "summary": "Memory deleted",
-                    "value": {
-                      "ok": true,
-                      "deleted": true
-                    }
-                  },
-                  "deletedFalse": {
-                    "summary": "Memory not found",
-                    "value": {
-                      "ok": true,
-                      "deleted": false
-                    }
-                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Bad request",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": true
                 }
               }
             }
           },
           "500": {
-            "description": "Server Error",
+            "description": "Server error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": true
                 }
               }
             }
           }
         }
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "ErrorResponse": {
-        "type": "object",
-        "properties": {
-          "ok": {
-            "type": "boolean"
-          },
-          "error": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "ok",
-          "error"
-        ],
-        "additionalProperties": true
       }
     }
   }
