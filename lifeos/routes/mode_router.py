@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Form, Query, HTTPException
 from pydantic import BaseModel
 from typing import Dict
-from storage.memory_manager import MemoryManager
-from services.ask_service import handle_ask
-from services.memory_service import write_memory, read_memory, delete_memory  # ✅ NEW
+from lifeos.storage.memory_manager import MemoryManager
+from lifeos.services.ask_service import handle_ask
+from lifeos.services.memory_service import write_memory, read_memory, delete_memory
 import os
 
 

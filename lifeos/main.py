@@ -25,6 +25,7 @@ def openapi_static():
     f = root / "public" / ".well-known" / "openapi.json"
     return FileResponse(str(f), media_type="application/json")
 
+
 # ─────────────────────────────────────────────────────────────
 # Middleware
 # ─────────────────────────────────────────────────────────────
@@ -38,12 +39,12 @@ app.add_middleware(
 )
 
 # ─────────────────────────────────────────────────────────────
-# Routers (runtime-relative imports only)
+# Routers (absolute package imports for local uvicorn)
 # ─────────────────────────────────────────────────────────────
 
-from routes.mode_router import ModeRouter
-from routes.memory_read_router import router as memory_read_router
-from routes.healthz import healthz_router
+from lifeos.routes.mode_router import ModeRouter
+from lifeos.routes.memory_read_router import router as memory_read_router
+from lifeos.routes.healthz import healthz_router
 
 router = ModeRouter()
 
