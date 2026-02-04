@@ -2,6 +2,7 @@ from fastapi import APIRouter, Form, Query, HTTPException
 from pydantic import BaseModel
 from typing import Dict
 from storage.memory_manager import MemoryManager
+from services.ask_service import handle_ask  # ✅ new service import
 import os
 
 
@@ -20,22 +21,10 @@ class ModeRouter:
         self.router.add_api_route("/memory", self.memory_delete_handler, methods=["DELETE"])
 
     def ask_handler(self, message: str = Form(...), user_id: str = Form(...)):
-        mm = MemoryManager(user_id)
-        memory = mm.get_all()
-        return {
-            "summary": f"You said: {message}",
-            "user_id": user_id,
-            "memory": memory
-        }
+        return handle_ask(message=message, user_id=user_id)
 
     def ask_handler_get(self, message: str = Query(...), user_id: str = Query(...)):
-        mm = MemoryManager(user_id)
-        memory = mm.get_all()
-        return {
-            "summary": f"You said: {message}",
-            "user_id": user_id,
-            "memory": memory
-        }
+        return handle_ask(message=message, user_id=user_id)
 
     def memory_write_handler(self, payload: MemoryWriteRequest):
         mm = MemoryManager(payload.user_id)
