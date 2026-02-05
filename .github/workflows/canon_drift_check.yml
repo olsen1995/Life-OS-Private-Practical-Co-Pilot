@@ -1,50 +1,29 @@
-name: Canon Drift Detection
+name: Canon Drift Check
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
+    paths:
+      - "lifeos/canon/**"
+      - "tests/canon/test_drift.py"
+  workflow_dispatch:
 
 jobs:
-  canon-drift:
+  drift_check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Build Canon Snapshot (aligned with lifeos rootDir)
-        env:
-          PYTHONPATH: lifeos
-        run: |
-          python - << 'EOF'
-          from lifeos.canon.snapshot import build_snapshot
-
-          snapshot = build_snapshot()
-          integrity = snapshot["integrity"]
-
-          with open("current_snapshot_hash.txt", "w") as f:
-              f.write(integrity["snapshot_hash"])
-
-          with open("current_versions.txt", "w") as f:
-              f.write(
-                  integrity["canon_version"] + "\n" +
-                  integrity["normalization_version"]
-              )
-          EOF
-
-      - name: Enforce Version Discipline
-        run: |
-          if ! diff canon_baselines/snapshot_hash.txt current_snapshot_hash.txt >/dev/null; then
-            echo "Snapshot hash changed."
-            if diff canon_versions.txt current_versions.txt >/dev/null; then
-              echo "ERROR: Hash changed without version bump."
-              exit 1
-            fi
-          fi
-
-      - name: Upload Drift Artifacts
-        uses: actions/upload-artifact@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          name: canon-drift
-          path: |
-            current_snapshot_hash.txt
-            current_versions.txt
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest
+
+      - name: Run drift check
+        run: |
+          pytest tests/canon/test_drift.py

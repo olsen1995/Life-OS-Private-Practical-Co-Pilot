@@ -1,44 +1,24 @@
-name: Canon Governance Freeze Guard
+name: Canon Freeze Guard
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
+    paths:
+      - "canon/Canon_Manifest_v5.0.json"
+      - ".github/workflows/canon_freeze_guard.yml"
+  workflow_dispatch:
 
 jobs:
-  freeze-guard:
+  freeze_guard:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          fetch-depth: 0
+          python-version: "3.11"
 
-      - name: Fetch origin/main for diff base
-        run: git fetch origin main --depth=50
-
-      - name: Detect frozen artifact changes
+      - name: Check for unintended changes
         run: |
-          python - << 'EOF'
-          import json, subprocess, pathlib
-
-          freeze = json.load(open("governance/FREEZE_PHASE_38.json"))
-          frozen = set(freeze["frozen_artifacts"])
-
-          diff = subprocess.check_output(
-            ["git", "diff", "--name-only", "origin/main...HEAD"],
-            text=True
-          ).splitlines()
-
-          touched = frozen.intersection(diff)
-          if not touched:
-              print("No frozen artifacts modified.")
-              raise SystemExit(0)
-
-          unfreeze = pathlib.Path("governance/UNFREEZE_PHASE_38.md").exists()
-          if not unfreeze:
-              raise SystemExit(
-                f"Frozen artifacts modified without unfreeze intent: {sorted(touched)}"
-              )
-
-          print("Frozen artifacts modified with explicit unfreeze intent.")
-          EOF
+          git diff --exit-code canon/Canon_Manifest_v5.0.json

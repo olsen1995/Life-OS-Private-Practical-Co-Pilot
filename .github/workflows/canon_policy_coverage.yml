@@ -1,41 +1,29 @@
-name: Canon Policy Coverage Check
+name: Canon Policy Coverage
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
+    paths:
+      - "lifeos/canon/**"
+      - "tests/canon/test_policy_coverage.py"
+  workflow_dispatch:
 
 jobs:
-  policy-coverage:
+  policy_coverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Verify Canon Read Route Coverage
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
         run: |
-          python - << 'EOF'
-          import json
-          from lifeos.canon.read_routes import READ_ROUTES
+          pip install -r requirements.txt
+          pip install pytest
 
-          policy = json.load(open("lifeos/canon/access_policy.json"))
-
-          governed = {(r["subject"], r["resource"]) for r in policy["rules"]}
-          subjects = policy["subjects"]
-
-          errors = []
-
-          for route, resource in READ_ROUTES.items():
-              for subject in subjects:
-                  if (subject, resource) not in governed:
-                      errors.append(
-                          f"Missing policy rule for subject={subject}, resource={resource}"
-                      )
-
-          if errors:
-              print("POLICY COVERAGE ERRORS:")
-              for e in errors:
-                  print("-", e)
-              raise SystemExit(1)
-
-          print("Canon policy coverage OK.")
-          EOF
+      - name: Run policy coverage test
+        run: |
+          pytest tests/canon/test_policy_coverage.py
