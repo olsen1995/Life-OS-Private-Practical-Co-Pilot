@@ -1,4 +1,3 @@
-# lifeos/canon/read_gate.py
 """
 Phase 34 — Canon Read Access Gate
 
@@ -9,7 +8,7 @@ Phase 34 — Canon Read Access Gate
 
 import json
 from pathlib import Path
-from canon.read_routes import READ_ROUTES
+from lifeos.canon.read_routes import READ_ROUTES
 
 
 _POLICY_PATH = Path("lifeos/canon/access_policy.json")
@@ -44,4 +43,3 @@ def assert_read_allowed(*, route: str, subject: str) -> str:
     raise CanonAccessDenied(
         f"Read access denied (subject={subject}, resource={resource})"
     )
-

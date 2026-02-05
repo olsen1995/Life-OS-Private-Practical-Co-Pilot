@@ -1,9 +1,9 @@
 from fastapi import APIRouter
 
-from canon.digest import get_digest
-from canon.schemas import get_schemas
-from canon.snapshot import get_snapshot
-from canon.trees import get_trees
+from lifeos.canon.digest import get_digest
+from lifeos.canon.schemas import get_schemas
+from lifeos.canon.snapshot import get_snapshot
+from lifeos.canon.trees import get_trees
 
 
 class CanonRouter:

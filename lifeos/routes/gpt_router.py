@@ -5,12 +5,12 @@ import logging
 import json
 import os
 
-from routes.canon_router import CanonRouter
-from gpt.gpt_summarizer import (
+from lifeos.routes.canon_router import CanonRouter
+from lifeos.gpt.gpt_summarizer import (
     summarize_entity,
     llm_summarize_entity
 )
-from gpt.summary_validator import validate_summary
+from lifeos.gpt.summary_validator import validate_summary
 
 logger = logging.getLogger("lifeos")
 router = APIRouter()
@@ -85,4 +85,3 @@ async def summarize_canon(request: CanonSummarizeRequest):
         "summary_length": len(summary)
     }))
     return {"status": "ok", "summary": summary}
-

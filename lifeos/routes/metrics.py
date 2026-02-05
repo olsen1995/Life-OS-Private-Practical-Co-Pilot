@@ -1,4 +1,4 @@
-from metrics.aggregator import aggregate_reads
+from lifeos.metrics.aggregator import aggregate_reads
 
 
 def get_metrics(window: str | None = None):

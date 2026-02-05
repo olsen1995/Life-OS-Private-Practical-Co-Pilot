@@ -1,13 +1,13 @@
 import json
 from pathlib import Path
 
-from canon.hash_utils import sha256_bytes
-from canon.normalization import (
+from lifeos.canon.hash_utils import sha256_bytes
+from lifeos.canon.normalization import (
     NORMALIZATION_VERSION,
     normalize,
     normalize_to_bytes,
 )
-from meta.version import get_version
+from lifeos.meta.version import get_version
 
 _CANON_ROOT = Path(__file__).resolve().parent
 _POLICY_VERSION = "1.0.0"

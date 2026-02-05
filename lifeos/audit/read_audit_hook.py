@@ -1,6 +1,5 @@
-
-from audit.audit_writer import write_audit_record
-from provenance.provenance_envelope import build_provenance_envelope
+from lifeos.audit.audit_writer import write_audit_record
+from lifeos.provenance.provenance_envelope import build_provenance_envelope
 
 
 def audit_read_with_provenance(
@@ -35,4 +34,3 @@ def audit_read_with_provenance(
         digest_hash=digest_hash,
         provenance=provenance,
     )
-
