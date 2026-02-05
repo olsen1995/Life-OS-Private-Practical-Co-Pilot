@@ -1,22 +1,26 @@
 {
-  "version": "1.0.1",
+  "contract_name": "Canon Integrity Contract",
+  "version": "5.0",
+  "deterministic_order": true,
+  "schema_version": "1.0",
+  "domains": [
+    "StrategyMaps",
+    "DefensiveStrategy",
+    "OffensiveStrategy",
+    "NeutralZone",
+    "Forecheck",
+    "QuickBreakout",
+    "ControlBreakout",
+    "DefensivePressure"
+  ],
   "invariants": {
-    "normalization": {
-      "single_source_of_truth": true,
-      "total": true,
-      "closed": true
-    },
-    "ordering": {
-      "rules_enforced": true,
-      "implicit_ordering_forbidden": true
-    },
-    "hashing": {
-      "algorithm": "sha256",
-      "input": "normalized_utf8_bytes_only"
-    },
-    "versioning": {
-      "canon_version_changes_only_on_canon_mutation": true,
-      "normalization_version_changes_only_on_rule_change": true
-    }
+    "key_ordering": "alphabetical",
+    "strategy_id_format": "canonical-string",
+    "reject_undefined_keys": true
+  },
+  "enforcement": {
+    "drift_guard": true,
+    "freeze_guard": true,
+    "metrics_invariants": true
   }
 }
