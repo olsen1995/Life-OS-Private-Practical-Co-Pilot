@@ -7,6 +7,13 @@ from typing import Any, Mapping
 FREEZE_FILE = Path("lifeos/FREEZE.json")
 CANON_PATH = Path("lifeos/canon")
 
+REQUIRED_OVERRIDE_FIELDS = {
+    "override",
+    "override_by",
+    "override_reason",
+    "override_timestamp",
+}
+
 
 def _git_diff_exists(path: Path) -> bool:
     """
@@ -21,13 +28,30 @@ def _git_diff_exists(path: Path) -> bool:
     return bool(result.stdout.strip())
 
 
-def test_canon_is_immutable_when_frozen():
+def _has_valid_override(data: Mapping[str, Any]) -> bool:
     """
-    Canon must not change when a freeze is active with scope:
-    - canon
-    - global
+    Validate that an emergency override is explicit, complete, and auditable.
+    """
+    if data.get("override") is not True:
+        return False
 
-    This test enforces immutability without modifying Canon data.
+    missing = REQUIRED_OVERRIDE_FIELDS - set(data.keys())
+    if missing:
+        raise AssertionError(
+            "Freeze override is incomplete. Missing fields:\n"
+            + "\n".join(sorted(missing))
+        )
+
+    for field in REQUIRED_OVERRIDE_FIELDS:
+        assert data[field], f"Override field '{field}' must be non-empty"
+
+    return True
+
+
+def test_canon_is_immutable_when_frozen_with_audited_override():
+    """
+    Canon must not change when a freeze is active unless
+    an explicit, fully-audited override is declared.
     """
 
     if not FREEZE_FILE.exists():
@@ -35,7 +59,6 @@ def test_canon_is_immutable_when_frozen():
         return
 
     data: Any = json.loads(FREEZE_FILE.read_text(encoding="utf-8"))
-
     assert isinstance(data, Mapping), "FREEZE.json must be a JSON object"
 
     scope = data.get("scope")
@@ -44,7 +67,11 @@ def test_canon_is_immutable_when_frozen():
         # Freeze does not apply to Canon
         return
 
+    if _has_valid_override(data):
+        # Explicit, audited override allows Canon changes
+        return
+
     assert not _git_diff_exists(CANON_PATH), (
-        "Canon is frozen but changes were detected under lifeos/canon/. "
-        "Remove the freeze or revert Canon changes."
+        "Canon is frozen and no valid emergency override is present. "
+        "Either remove the freeze or declare a full audited override."
     )
