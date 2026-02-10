@@ -3,9 +3,9 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Set, NoReturn, cast
+from typing import Any, Dict, List, Set, NoReturn
 
-
+# Validate the one true spec served at runtime
 OPENAPI_PATH = Path("public/.well-known/openapi.json")
 EXPECTED_SERVER = "https://life-os-private-practical-co-pilot.onrender.com"
 
@@ -16,6 +16,9 @@ REQUIRED_ROUTES = {
 
 REQUIRED_OPERATION_FLAGS = {"x-openai-isConsequential"}
 REQUIRED_RESPONSE_KEYS = {"summary"}
+
+# Fields that may appear in /ask 200-responses but are not mandatory
+OPTIONAL_RESPONSE_KEYS = {"memory", "user_id"}
 
 
 def fail(msg: str) -> NoReturn:
@@ -119,13 +122,16 @@ def assert_responses(route: str, method: str, op: Dict[str, Any]) -> None:
 
     prop_keys: Set[str] = set(properties.keys())
 
+    # required keys must exist
     missing = REQUIRED_RESPONSE_KEYS - prop_keys
     if missing:
         fail(
             f"Missing required response properties {sorted(missing)} on {method.upper()} {route}"
         )
 
-    undocumented = prop_keys - REQUIRED_RESPONSE_KEYS
+    # flag truly unknown keys
+    allowed_keys = REQUIRED_RESPONSE_KEYS | OPTIONAL_RESPONSE_KEYS
+    undocumented = prop_keys - allowed_keys
     if undocumented:
         fail(
             f"Undocumented response properties detected {sorted(undocumented)} on {method.upper()} {route}"
